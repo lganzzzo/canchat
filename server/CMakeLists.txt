@@ -21,15 +21,39 @@ add_library(${project_name}-lib
 
 ## link libs
 
+include(FindPkgConfig) # <-- include pkg-config needed by FindLibreSSL.cmake script
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake") # <-- use FindLibreSSL.cmake in /cmake folder
+
+find_package(LibreSSL 3.0.0 REQUIRED)
+
 find_package(oatpp              1.0.0 REQUIRED)
 find_package(oatpp-websocket    1.0.0 REQUIRED)
+find_package(oatpp-libressl     1.0.0 REQUIRED)
 
 target_link_libraries(${project_name}-lib
+
+        # Oat++ libraries
         PUBLIC oatpp::oatpp
         PUBLIC oatpp::oatpp-test
         PUBLIC oatpp::oatpp-websocket
+        PUBLIC oatpp::oatpp-libressl
+
+        # LibreSSL libraries
+        PUBLIC LibreSSL::TLS
+        PUBLIC LibreSSL::SSL
+        PUBLIC LibreSSL::Crypto
+
 )
 
+#################################################################
+## define certificates path
+
+add_definitions(
+        -DCERT_PEM_PATH="${CMAKE_CURRENT_LIST_DIR}/cert/test_key.pem"
+        -DCERT_CRT_PATH="${CMAKE_CURRENT_LIST_DIR}/cert/test_cert.crt"
+)
+
+#################################################################
 ## add executables
 
 add_executable(${project_name}-exe
