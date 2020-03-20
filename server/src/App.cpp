@@ -1,4 +1,7 @@
+
 #include "controller/RoomsController.hpp"
+#include "controller/StaticController.hpp"
+
 #include "./AppComponent.hpp"
 
 #include "oatpp/network/server/Server.hpp"
@@ -14,8 +17,11 @@ void run() {
   OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router);
 
   /* Create RoomsController and add all of its endpoints to router */
-  auto myController = std::make_shared<RoomsController>();
-  myController->addEndpointsToRouter(router);
+  auto roomsController = std::make_shared<RoomsController>();
+  roomsController->addEndpointsToRouter(router);
+
+  auto staticController = std::make_shared<StaticController>();
+  staticController->addEndpointsToRouter(router);
 
   /* Get connection handler component */
   OATPP_COMPONENT(std::shared_ptr<oatpp::network::server::ConnectionHandler>, connectionHandler, "http");

@@ -24,33 +24,11 @@ public:
     : oatpp::web::server::api::ApiController(objectMapper)
   {}
 public:
-  
+
 /**
  *  Begin ENDPOINTs generation ('ApiController' codegen)
  */
 #include OATPP_CODEGEN_BEGIN(ApiController)
-  
-  ENDPOINT_ASYNC("GET", "/", Root) {
-    
-    ENDPOINT_ASYNC_INIT(Root)
-
-    const char* pageTemplate =
-      "<html lang='en'>"
-        "<head>"
-          "<meta charset=utf-8/>"
-        "</head>"
-        "<body>"
-          "<p>Hello Async WebSocket Rooms Server!</p>"
-          "<p>Connect to chat room:</p>"
-          "<code>localhost:8000/ws/chat/{room_name}/?nickname={nickname}</code>"
-        "</body>"
-      "</html>";
-
-    Action act() override {
-      return _return(controller->createResponse(Status::CODE_200, pageTemplate));
-    }
-    
-  };
 
   ENDPOINT_ASYNC("GET", "ws/chat/{room-name}/*", WS) {
 
@@ -79,14 +57,14 @@ public:
     }
 
   };
-  
+
   // TODO Insert Your endpoints here !!!
-  
+
 /**
  *  Finish ENDPOINTs generation ('ApiController' codegen)
  */
 #include OATPP_CODEGEN_END(ApiController)
-  
+
 };
 
 #endif /* RoomsController_hpp */
