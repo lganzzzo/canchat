@@ -53,6 +53,7 @@ add_definitions(
         -DCERT_PEM_PATH="${CMAKE_CURRENT_LIST_DIR}/cert/test_key.pem"
         -DCERT_CRT_PATH="${CMAKE_CURRENT_LIST_DIR}/cert/test_cert.crt"
         -DFRONT_PATH="${CMAKE_CURRENT_LIST_DIR}/../front"
+        -DCHAT_HOST="localhost:8443"
 )
 
 #################################################################

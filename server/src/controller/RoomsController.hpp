@@ -11,9 +11,9 @@
 #include "oatpp/core/macro/codegen.hpp"
 #include "oatpp/core/macro/component.hpp"
 
-/**
- * Controller with WebSocket-connect endpoint.
- */
+
+#include OATPP_CODEGEN_BEGIN(ApiController) /// <-- Begin Code-Gen
+
 class RoomsController : public oatpp::web::server::api::ApiController {
 private:
   typedef RoomsController __ControllerType;
@@ -25,19 +25,14 @@ public:
   {}
 public:
 
-/**
- *  Begin ENDPOINTs generation ('ApiController' codegen)
- */
-#include OATPP_CODEGEN_BEGIN(ApiController)
-
-  ENDPOINT_ASYNC("GET", "ws/chat/{room-name}/*", WS) {
+  ENDPOINT_ASYNC("GET", "api/ws/room/{roomId}/", WS) {
 
     ENDPOINT_ASYNC_INIT(WS)
 
     Action act() override {
 
-      auto roomName = request->getPathVariable("room-name");
-      auto nickname = request->getQueryParameter("nickname");
+      auto roomName = request->getPathVariable("roomId");
+      auto nickname = "Mr.X";
 
       OATPP_ASSERT_HTTP(nickname, Status::CODE_400, "No nickname specified.");
 
@@ -58,13 +53,8 @@ public:
 
   };
 
-  // TODO Insert Your endpoints here !!!
-
-/**
- *  Finish ENDPOINTs generation ('ApiController' codegen)
- */
-#include OATPP_CODEGEN_END(ApiController)
-
 };
+
+#include OATPP_CODEGEN_END(ApiController) /// <-- End Code-Gen
 
 #endif /* RoomsController_hpp */

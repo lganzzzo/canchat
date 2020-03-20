@@ -1,4 +1,4 @@
-let socket = new WebSocket("wss://localhost:8443/ws/chat/my-room/?nickname=mr.x");
+let socket = new WebSocket("%%%URL%%%");
 
 // send message from the form
 document.forms.publish.onsubmit = function() {
