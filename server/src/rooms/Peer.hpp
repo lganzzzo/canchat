@@ -2,10 +2,14 @@
 #ifndef ASYNC_SERVER_ROOMS_PEER_HPP
 #define ASYNC_SERVER_ROOMS_PEER_HPP
 
+#include "dto/DTOs.hpp"
+
 #include "oatpp-websocket/AsyncWebSocket.hpp"
 
 #include "oatpp/core/async/Lock.hpp"
 #include "oatpp/core/async/Executor.hpp"
+
+#include "oatpp/core/data/mapping/ObjectMapper.hpp"
 
 #include "oatpp/core/macro/component.hpp"
 
@@ -28,20 +32,21 @@ private:
   std::shared_ptr<AsyncWebSocket> m_socket;
   std::shared_ptr<Room> m_room;
   oatpp::String m_nickname;
-  v_int32 m_userId;
+  v_int64 m_userId;
 private:
 
   /**
    * Inject async executor object.
    */
   OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, m_asyncExecutor);
+  OATPP_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>, m_objectMapper);
 
 public:
 
   Peer(const std::shared_ptr<AsyncWebSocket>& socket,
        const std::shared_ptr<Room>& room,
        const oatpp::String& nickname,
-       v_int32 userId)
+       v_int64 userId)
     : m_socket(socket)
     , m_room(room)
     , m_nickname(nickname)
@@ -52,7 +57,7 @@ public:
    * Send message to peer (to user).
    * @param message
    */
-  void sendMessage(const oatpp::String& message);
+  void sendMessage(const MessageDto::ObjectWrapper& message);
 
   /**
    * Get room of the peer.
@@ -70,7 +75,7 @@ public:
    * Get peer userId.
    * @return
    */
-  v_int32 getUserId();
+  v_int64 getUserId();
 
 public: // WebSocket Listener methods
 

@@ -1,7 +1,7 @@
 
 #include "Lobby.hpp"
 
-v_int32 Lobby::obtainNewUserId() {
+v_int64 Lobby::obtainNewUserId() {
   return m_userIdCounter ++;
 }
 
@@ -24,7 +24,7 @@ void Lobby::onAfterCreate_NonBlocking(const std::shared_ptr<AsyncWebSocket>& soc
   socket->setListener(peer);
 
   room->addPeer(peer);
-  room->sendMessage(nickname + " joined " + roomName);
+  room->welcomePeer(peer);
 
 }
 
@@ -36,7 +36,7 @@ void Lobby::onBeforeDestroy_NonBlocking(const std::shared_ptr<AsyncWebSocket>& s
 
   room->removePeerByUserId(peer->getUserId());
 
-  room->sendMessage(nickname + " left the room");
+  room->goodbyePeer(peer);
 
   /* Remove circle `std::shared_ptr` dependencies */
   socket->setListener(nullptr);

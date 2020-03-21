@@ -2,7 +2,7 @@
 #include "Peer.hpp"
 #include "Room.hpp"
 
-void Peer::sendMessage(const oatpp::String& message) {
+void Peer::sendMessage(const MessageDto::ObjectWrapper& message) {
 
   class SendMessageCoroutine : public oatpp::async::Coroutine<SendMessageCoroutine> {
   private:
@@ -25,7 +25,7 @@ void Peer::sendMessage(const oatpp::String& message) {
 
   };
 
-  m_asyncExecutor->execute<SendMessageCoroutine>(&m_writeLock, m_socket, message);
+  m_asyncExecutor->execute<SendMessageCoroutine>(&m_writeLock, m_socket, m_objectMapper->writeToString(message));
 
 }
 
@@ -37,7 +37,7 @@ oatpp::String Peer::getNickname() {
   return m_nickname;
 }
 
-v_int32 Peer::getUserId() {
+v_int64 Peer::getUserId() {
   return m_userId;
 }
 
@@ -60,7 +60,10 @@ oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebS
     auto wholeMessage = m_messageBuffer.toString();
     m_messageBuffer.clear();
 
-    m_room->sendMessage(m_nickname + ": " + wholeMessage);
+    auto message = m_objectMapper->readFromString<MessageDto>(wholeMessage);
+    message->peerName = m_nickname;
+
+    m_room->sendMessage(message);
 
   } else if(size > 0) { // message frame received
     m_messageBuffer.writeSimple(data, size);

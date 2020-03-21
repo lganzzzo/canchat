@@ -11,7 +11,7 @@
 
 class Lobby : public oatpp::websocket::AsyncConnectionHandler::SocketInstanceListener {
 public:
-  std::atomic<v_int32> m_userIdCounter;
+  std::atomic<v_int64> m_userIdCounter;
   std::unordered_map<oatpp::String, std::shared_ptr<Room>> m_rooms;
   std::mutex m_roomsMutex;
 public:
@@ -24,7 +24,7 @@ public:
    * Generate id for new user
    * @return
    */
-  v_int32 obtainNewUserId();
+  v_int64 obtainNewUserId();
 
   /**
    * Get room by name or create new one if not exists.
