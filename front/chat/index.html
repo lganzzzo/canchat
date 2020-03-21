@@ -3,19 +3,162 @@
 <head>
     <meta charset="UTF-8">
     <title>Can-Chat</title>
+
+    <style>
+
+        html {
+            height: 100%;
+        }
+
+        body {
+            margin: 0px 0px 0px 0px;
+            height: 100%;
+        }
+
+        #chat_container {
+            position: absolute;
+            bottom: 10px;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+        }
+
+        #chat_history {
+            position: absolute;
+            bottom:0;
+            top:0;
+            left:0;
+            right:0;
+            border: 2px solid #ECEFF1;
+            overflow: scroll;
+            margin-bottom: 102px;
+            padding: 2px;
+            border-radius: 3px;
+        }
+
+        #chat_input_container {
+            background-color: #ECEFF1;
+            position: absolute;
+            bottom:0;
+            left:0;
+            right:0;
+            height: 100px;
+            width: 100%;
+            border-radius: 3px;
+        }
+
+        form {
+            display: block;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #ta-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            right: 100px;
+            padding: 2px;
+            border-radius: 3px;
+        }
+
+        #ta-div {
+            position: absolute;
+            left: 2px;
+            top: 2px;
+            bottom: 2px;
+            right: 2px;
+            padding: 2px 5px 2px 5px;
+            background-color: white;
+            border-radius: 3px;
+        }
+
+        form textarea {
+            margin: 0;
+            padding: 0;
+            border: none;
+            overflow: auto;
+            outline: none;
+            -webkit-box-shadow: none;
+            -moz-box-shadow: none;
+            box-shadow: none;
+            resize: none;
+            height: 100%;
+            width: 100%;
+            font-size: 14px;
+            border-radius: 3px;
+        }
+
+        .input-button {
+            position: absolute;
+            border: none;
+            outline: none;
+            padding: 15px 20px;
+            display: inline-block;
+            cursor: pointer;
+            right: 0px;
+            height: 96px;
+            width: 98px;
+            margin: 2px;
+            font-size: 14px;
+            border-radius: 3px;
+        }
+
+        .input-button:active {
+            background-color: #18FFFF;
+        }
+
+        .message-container {
+            text-align: right;
+        }
+
+        .message-div {
+            display: inline-block;
+            margin: 3px;
+            background-color: #E0F7FA;
+            border-radius: 20px;
+            padding: 5px 20px 5px 20px;
+        }
+
+        .message-author {
+            margin: 0 0 2px 0;
+            font-size: 12px;
+            color: #BBBBBB;
+        }
+
+        .message-text {
+            margin: 0;
+            font-size: 14px;
+        }
+
+    </style>
+
 </head>
 <body>
 
-    <!-- message form -->
-    <form name="publish">
-        <input type="text" name="message">
-        <input type="submit" value="Send">
-    </form>
+    <div id="chat_container">
 
-    <!-- div with messages -->
-    <div id="messages"></div>
+        <div id="chat_history">
+
+        </div>
+
+        <div id="chat_input_container">
+            <form name="publish" autocomplete="off">
+                <div id="ta-container">
+                    <div id="ta-div">
+                        <textarea class="input-text" placeholder="Type a message" name="message" id="chat_input"></textarea>
+                    </div>
+                </div>
+                <input class="input-button" type="submit" value="Send">
+            </form>
+        </div>
+
+    </div>
+
+</body>
 
     <script src="/room/%%%ROOM_ID%%%/chat.js"></script>
 
-</body>
 </html>

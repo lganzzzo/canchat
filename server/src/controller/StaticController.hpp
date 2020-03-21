@@ -44,7 +44,7 @@ public:
     ENDPOINT_ASYNC_INIT(ChatHTML)
 
     Action act() override {
-      static auto fileCache = loadFile(FRONT_PATH "/chat/index.html")->std_str();
+      /*static*/ auto fileCache = loadFile(FRONT_PATH "/chat/index.html")->std_str();
       auto text = std::regex_replace(fileCache, std::regex("%%%ROOM_ID%%%"), request->getPathVariable("roomId")->std_str());
       auto response = controller->createResponse(Status::CODE_200, oatpp::String(text.data(), text.size(), true));
       response->putHeader(Header::CONTENT_TYPE, "text/html");
@@ -58,7 +58,7 @@ public:
     ENDPOINT_ASYNC_INIT(ChatJS)
 
     Action act() override {
-      static auto fileCache = loadFile(FRONT_PATH "/chat/chat.js")->std_str();
+      /*static*/ auto fileCache = loadFile(FRONT_PATH "/chat/chat.js")->std_str();
       oatpp::String url = "wss://" CHAT_HOST "/api/ws/room/" + request->getPathVariable("roomId");
       auto text = std::regex_replace(fileCache, std::regex("%%%URL%%%"), url->std_str());
       auto response = controller->createResponse(Status::CODE_200, oatpp::String(text.data(), text.size(), true));
