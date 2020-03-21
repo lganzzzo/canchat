@@ -16,9 +16,8 @@ void Room::welcomePeer(const std::shared_ptr<Peer>& peer) {
 
   auto joinedMessage = MessageDto::createShared();
   joinedMessage->code = MessageDto::CODE_PEER_JOINED;
-  joinedMessage->peerId = peer->getUserId();
-  joinedMessage->peerName = peer->getNickname();
-  joinedMessage->message = "Joined '" + m_name + "'!";
+  joinedMessage->peerId = 0;
+  joinedMessage->message = "'" + peer->getNickname() + "' joined room";
 
   sendMessage(joinedMessage);
 }
@@ -27,9 +26,8 @@ void Room::goodbyePeer(const std::shared_ptr<Peer>& peer) {
 
   auto message = MessageDto::createShared();
   message->code = MessageDto::CODE_PEER_LEFT;
-  message->peerId = peer->getUserId();
-  message->peerName = peer->getNickname();
-  message->message = "Left the room";
+  message->peerId = 0;
+  message->message = "'" + peer->getNickname() + "' left room";
 
   sendMessage(message);
 

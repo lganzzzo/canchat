@@ -17,7 +17,7 @@ public:
 public:
 
   Lobby()
-    : m_userIdCounter(0)
+    : m_userIdCounter(1)
   {}
 
   /**

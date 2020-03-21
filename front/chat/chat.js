@@ -12,29 +12,42 @@ let bulbColors = [  "#FFEBEE", "#FCE4EC", "#F3E5F5",
 function onChatMessage(message) {
 
     let messageElem = document.createElement('div');
-    if(message.peerId == peerId) {
-        messageElem.className = "message-container-me";
-    } else {
-        messageElem.className = "message-container";
-    }
 
     let messageDiv = document.createElement('div');
-    messageDiv.className = "message-div";
-    if(message.peerId == peerId) {
-        messageDiv.style.backgroundColor = "#E0F7FA";
-    } else {
-        messageDiv.style.backgroundColor = bulbColors[message.peerId % bulbColors.length];
-    }
-
-    let peerName = document.createElement('p');
-    peerName.className = "message-author";
-    peerName.textContent = message.peerName;
 
     let messageText = document.createElement('pre');
     messageText.className = "message-text";
-    messageText.textContent = message.message;
 
-    messageDiv.append(peerName);
+    if(message.peerId != 0) {
+
+        messageDiv.className = "message-div";
+
+        if (message.peerId == peerId) {
+            messageElem.className = "message-container-me";
+        } else {
+            messageElem.className = "message-container";
+        }
+
+        if (message.peerId == peerId) {
+            messageDiv.style.backgroundColor = "#E0F7FA";
+        } else {
+            messageDiv.style.backgroundColor = bulbColors[message.peerId % bulbColors.length];
+        }
+
+        let peerName = document.createElement('p');
+        peerName.className = "message-author";
+        peerName.textContent = message.peerName;
+        messageDiv.append(peerName);
+
+        messageText.textContent = message.message;
+
+    } else {
+        messageDiv.className = "message-div-system";
+        messageElem.className = "message-container";
+        messageDiv.style.backgroundColor = "#E0F7FA";
+        messageText.textContent = "📢" + message.message;
+    }
+
     messageDiv.append(messageText);
     messageElem.append(messageDiv);
 
@@ -53,14 +66,20 @@ function onChatMessage(message) {
 // send message from the form
 document.forms.publish.onsubmit = function() {
     let outgoingMessage = this.message.value;
-    let message = {
-        peerId: peerId,
-        peerName: peerName,
-        code: 3,
-        message: outgoingMessage
+
+    let text = outgoingMessage.replace(/\s/g,''); // check if text not empty (remove all whitespaces)
+
+    if(text !== "") {
+        let message = {
+            peerId: peerId,
+            peerName: peerName,
+            code: 3,
+            message: outgoingMessage
+        }
+        socket.send(JSON.stringify(message));
+        this.message.value = "";
     }
-    socket.send(JSON.stringify(message));
-    this.message.value = "";
+
     return false;
 };
 

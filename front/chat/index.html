@@ -122,8 +122,20 @@
         .message-div {
             display: inline-block;
             margin: 3px;
-            border-radius: 20px;
+            border-radius: 15px;
+            padding: 5px 20px 15px 20px;
+            max-width: 70%;
+            font-size: 14px;
+        }
+
+        .message-div-system {
+            text-align: left;
+            display: inline-block;
+            margin: 3px;
+            border-radius: 15px;
             padding: 5px 20px 5px 20px;
+            max-width: 70%;
+            font-size: 12px;
         }
 
         .message-author {
@@ -134,9 +146,14 @@
 
         .message-text {
             margin: 0;
-            font-size: 14px;
             text-align: left;
-            margin-bottom: 10px;
+
+            white-space: pre-wrap;       /* Since CSS 2.1 */
+            white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
+            white-space: -pre-wrap;      /* Opera 4-6 */
+            white-space: -o-pre-wrap;    /* Opera 7 */
+            word-wrap: break-word;       /* Internet Explorer 5.5+ */
+
         }
 
     </style>
@@ -154,7 +171,11 @@
             <form name="publish" autocomplete="off">
                 <div id="ta-container">
                     <div id="ta-div">
-                        <textarea class="input-text" placeholder="Type a message" name="message" id="chat_input"></textarea>
+                        <textarea class="input-text"
+                                  placeholder="Type a message"
+                                  name="message"
+                                  id="chat_input"
+                                  maxlength="4096"></textarea>
                     </div>
                 </div>
                 <input class="input-button" type="submit" value="Send">
