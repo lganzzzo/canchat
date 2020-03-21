@@ -1,6 +1,7 @@
 let socket = new WebSocket("%%%URL%%%");
 let peedId = null;
 let peerName = null;
+let peersMap = new Map();
 let bulbColors = [  "#FFEBEE", "#FCE4EC", "#F3E5F5",
                     "#EDE7F6", "#E8EAF6", "#E3F2FD",
                     "#E1F5FE",            "#E0F2F1",
@@ -9,44 +10,62 @@ let bulbColors = [  "#FFEBEE", "#FCE4EC", "#F3E5F5",
                     "#FBE9E7", "#EFEBE9", "#FAFAFA",
                     "#ECEFF1"];
 
-function onChatMessage(message) {
+function postChatMessage(message) {
 
     let messageElem = document.createElement('div');
 
+    if (message.peerId == peerId) {
+        messageElem.className = "message-container-me";
+    } else {
+        messageElem.className = "message-container";
+    }
+
     let messageDiv = document.createElement('div');
+    messageDiv.className = "message-div";
+
+    if (message.peerId == peerId) {
+        messageDiv.style.backgroundColor = "#E0F7FA";
+    } else {
+        messageDiv.style.backgroundColor = bulbColors[message.peerId % bulbColors.length];
+    }
+
+    let peerName = document.createElement('p');
+    let ts = new Date(message.timestamp / 1000);
+    peerName.className = "message-author";
+    peerName.textContent = message.peerName + " at " + ts.toLocaleString();
 
     let messageText = document.createElement('pre');
     messageText.className = "message-text";
+    messageText.textContent = message.message;
 
-    if(message.peerId != 0) {
+    messageDiv.append(peerName);
+    messageDiv.append(messageText);
+    messageElem.append(messageDiv);
 
-        messageDiv.className = "message-div";
+    let messageField = document.getElementById('chat_history');
+    let scrollPos = messageField.scrollHeight - messageField.scrollTop;
 
-        if (message.peerId == peerId) {
-            messageElem.className = "message-container-me";
-        } else {
-            messageElem.className = "message-container";
-        }
-
-        if (message.peerId == peerId) {
-            messageDiv.style.backgroundColor = "#E0F7FA";
-        } else {
-            messageDiv.style.backgroundColor = bulbColors[message.peerId % bulbColors.length];
-        }
-
-        let peerName = document.createElement('p');
-        peerName.className = "message-author";
-        peerName.textContent = message.peerName;
-        messageDiv.append(peerName);
-
-        messageText.textContent = message.message;
-
+    if(scrollPos <= messageField.getBoundingClientRect().height) {
+        messageField.append(messageElem);
+        messageField.scrollTop = messageField.scrollHeight;
     } else {
-        messageDiv.className = "message-div-system";
-        messageElem.className = "message-container";
-        messageDiv.style.backgroundColor = "#E0F7FA";
-        messageText.textContent = "📢" + message.message;
+        messageField.append(messageElem);
     }
+
+}
+
+function postSystemMessage(message) {
+
+    let messageElem = document.createElement('div');
+    messageElem.className = "message-container";
+
+    let messageDiv = document.createElement('div');
+    messageDiv.className = "message-div-system";
+    messageDiv.style.backgroundColor = "#E0F7FA";
+
+    let messageText = document.createElement('pre');
+    messageText.className = "message-text";
+    messageText.textContent = "📢" + message.message;
 
     messageDiv.append(messageText);
     messageElem.append(messageDiv);
@@ -60,6 +79,47 @@ function onChatMessage(message) {
     } else {
         messageField.append(messageElem);
     }
+
+}
+
+function updateParticipants() {
+
+    let list = document.getElementById('chat_participants');
+    let allPeersElem = document.createElement('div');
+
+    let peerElem = document.createElement('div');
+    peerElem.id = "peer_" + peerId;
+    peerElem.className = "participant";
+    peerElem.textContent = peerName;
+    peerElem.style.backgroundColor = "#E0F7FA";
+    allPeersElem.append(peerElem);
+
+    allPeersElem.append(document.createElement('hr'));
+
+    let keys = Array.from(peersMap.keys());
+    keys.sort();
+
+    for (index = 0; index < keys.length; index++) {
+
+        let id = keys[index];
+
+        if (id !== peerId) {
+            let peer = peersMap.get(id);
+
+            let peerElem = document.createElement('div');
+            peerElem.id = "peer_" + id;
+            peerElem.className = "participant";
+            peerElem.textContent = peer.peerName;
+
+            peerElem.style.backgroundColor = bulbColors[peer.peerId % bulbColors.length];
+
+            allPeersElem.append(peerElem);
+
+        }
+
+    }
+
+    list.innerHTML = allPeersElem.innerHTML;
 
 }
 
@@ -97,15 +157,34 @@ socket.onmessage = function(event) {
 
     switch(message.code) {
 
-        case 0:
+        case 0: // initial info
             peerId = message.peerId;
             peerName = message.peerName;
+
+            for (index = 0; index < message.peers.length; index++) {
+                let peer = message.peers[index];
+                peersMap.set(peer.peerId, peer);
+            }
+
+            updateParticipants();
+
             break;
 
-        case 1:
-        case 2:
-        case 3:
-            onChatMessage(message);
+        case 1: // joined
+            postSystemMessage(message);
+            peer = new Object();
+            peer.peerId = message.peerId;
+            peer.peerName = message.peerName;
+            peersMap.set(peer.peerId, peer);
+            updateParticipants();
+            break;
+        case 2: // left
+            postSystemMessage(message);
+            peersMap.delete(message.peerId);
+            updateParticipants();
+            break;
+        case 3: // message
+            postChatMessage(message);
             break;
 
     }

@@ -26,9 +26,9 @@
         #chat_history {
             position: absolute;
             bottom:0;
-            top:0;
+            top: 0;
             left:0;
-            right:0;
+            right: 260px;
             border: 2px solid #ECEFF1;
             overflow: scroll;
             margin-bottom: 102px;
@@ -41,10 +41,21 @@
             position: absolute;
             bottom:0;
             left:0;
-            right:0;
+            right: 260px;
             height: 100px;
-            width: 100%;
             border-radius: 3px;
+        }
+
+        #chat_participants {
+            position: absolute;
+            bottom: 0px;
+            top: 0;
+            right: 0;
+            width: 250px;
+            border: 2px solid #ECEFF1;
+            border-radius: 3px;
+            overflow: scroll;
+            padding: 2px;
         }
 
         form {
@@ -108,7 +119,7 @@
         }
 
         .input-button:active {
-            background-color: #18FFFF;
+            background-color: #E0F7FA;
         }
 
         .message-container {
@@ -156,6 +167,19 @@
 
         }
 
+        .participant {
+            margin: 3px;
+            border-radius: 15px;
+            padding: 5px 20px 5px 20px;
+            font-size: 14px;
+        }
+
+        #chat_container hr {
+            border: 1px solid #ECEFF1;
+            width: 50px;
+            color: red;
+        }
+
     </style>
 
 </head>
@@ -163,9 +187,7 @@
 
     <div id="chat_container">
 
-        <div id="chat_history">
-
-        </div>
+        <div id="chat_history"></div>
 
         <div id="chat_input_container">
             <form name="publish" autocomplete="off">
@@ -181,6 +203,8 @@
                 <input class="input-button" type="submit" value="Send">
             </form>
         </div>
+
+        <div id="chat_participants"></div>
 
     </div>
 

@@ -62,6 +62,7 @@ oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebS
 
     auto message = m_objectMapper->readFromString<MessageDto>(wholeMessage);
     message->peerName = m_nickname;
+    message->timestamp = oatpp::base::Environment::getMicroTickCount();
 
     m_room->sendMessage(message);
 
