@@ -2,10 +2,11 @@
 #ifndef RoomsController_hpp
 #define RoomsController_hpp
 
+#include "utils/Nickname.hpp"
+
 #include "oatpp-websocket/Handshaker.hpp"
 
 #include "oatpp/web/server/api/ApiController.hpp"
-
 #include "oatpp/network/server/ConnectionHandler.hpp"
 
 #include "oatpp/core/macro/codegen.hpp"
@@ -32,7 +33,7 @@ public:
     Action act() override {
 
       auto roomName = request->getPathVariable("roomId");
-      auto nickname = "Mr.X";
+      auto nickname = Nickname::random();
 
       OATPP_ASSERT_HTTP(nickname, Status::CODE_400, "No nickname specified.");
 
