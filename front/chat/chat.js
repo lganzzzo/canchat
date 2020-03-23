@@ -2,13 +2,7 @@ let socket = new WebSocket("%%%URL%%%");
 let peedId = null;
 let peerName = null;
 let peersMap = new Map();
-let bulbColors = [  "#FFEBEE", "#FCE4EC", "#F3E5F5",
-                    "#EDE7F6", "#E8EAF6", "#E3F2FD",
-                    "#E1F5FE",            "#E0F2F1",
-                    "#E8F5E9", "#F1F8E9", "#F9FBE7",
-                    "#FFFDE7", "#FFF8E1", "#FFF3E0",
-                    "#FBE9E7", "#EFEBE9", "#FAFAFA",
-                    "#ECEFF1"];
+let bulbColorsNumber = 18;
 
 function postChatMessage(message) {
 
@@ -26,7 +20,7 @@ function postChatMessage(message) {
     if (message.peerId == peerId) {
         messageDiv.style.backgroundColor = "#E0F7FA";
     } else {
-        messageDiv.style.backgroundColor = bulbColors[message.peerId % bulbColors.length];
+        messageDiv.classList.add("peer_style_" + (message.peerId % bulbColorsNumber));
     }
 
     let peerName = document.createElement('p');
@@ -82,19 +76,60 @@ function postSystemMessage(message) {
 
 }
 
-function updateParticipants() {
+function createParticipantElement(peer) {
+    let peerElem = document.createElement('div');
+    peerElem.id = "peer_" + peer.peerId;
+    peerElem.setAttribute("peer_id", peer.peerId);
+    peerElem.className = "participant";
+    if(peer.peerId == peerId) {
+        peerElem.style.backgroundColor = "#E0F7FA";
+    } else {
+        peerElem.classList.add("peer_style_" + (peer.peerId % bulbColorsNumber));
+    }
+    let span = document.createElement('span');
+    span.textContent = peer.peerName;
+    peerElem.append(span);
+    return peerElem;
+}
 
+function removeParticipantElement(peerElem) {
+    let transitionCounter = 0;
+    peerElem.classList.add("participant_deleted");
+    peerElem.addEventListener('transitionstart', function() {
+        transitionCounter ++;
+    });
+    peerElem.addEventListener('transitionend', function() {
+        transitionCounter --;
+        if(transitionCounter == 0) {
+            peerElem.remove();
+        }
+    });
+}
+
+function addParticipant(peer, parent) {
+    parent.append(createParticipantElement(peer));
+}
+
+function createParticipantsList() {
     let list = document.getElementById('chat_participants');
     let allPeersElem = document.createElement('div');
 
-    let peerElem = document.createElement('div');
-    peerElem.id = "peer_" + peerId;
-    peerElem.className = "participant";
-    peerElem.textContent = peerName;
-    peerElem.style.backgroundColor = "#E0F7FA";
-    allPeersElem.append(peerElem);
+    let caption = document.createElement('p');
+    caption.id = "participant_count";
+    caption.textContent = "Participants: " + peersMap.size;
+    caption.className = "participant_n";
+    allPeersElem.append(caption);
+
+    let peer = new Object();
+    peer.peerId = peerId;
+    peer.peerName = peerName;
+    addParticipant(peer, allPeersElem);
 
     allPeersElem.append(document.createElement('hr'));
+
+    let otherPeersElem = document.createElement('div');
+    otherPeersElem.id = "peers_other";
+    allPeersElem.append(otherPeersElem);
 
     let keys = Array.from(peersMap.keys());
     keys.sort();
@@ -105,21 +140,82 @@ function updateParticipants() {
 
         if (id !== peerId) {
             let peer = peersMap.get(id);
-
-            let peerElem = document.createElement('div');
-            peerElem.id = "peer_" + id;
-            peerElem.className = "participant";
-            peerElem.textContent = peer.peerName;
-
-            peerElem.style.backgroundColor = bulbColors[peer.peerId % bulbColors.length];
-
-            allPeersElem.append(peerElem);
-
+            addParticipant(peer, otherPeersElem);
         }
-
     }
 
     list.innerHTML = allPeersElem.innerHTML;
+}
+
+function updateParticipants() {
+
+    let list = document.getElementById('chat_participants');
+    if(list.innerHTML === "") {
+        createParticipantsList();
+    } else {
+
+        let countElem = document.getElementById('participant_count');
+        countElem.textContent = "Participants: " + peersMap.size;
+
+        let keys = Array.from(peersMap.keys());
+        keys.sort();
+
+        let list = document.getElementById('peers_other');
+        let children = list.children;
+        let childrenLeft = [];
+        let childrenNew = [];
+
+        for (index = 0; index < children.length; index ++) {
+
+            let child = children[index];
+            if(!peersMap.get(parseInt(child.getAttribute("peer_id")))) {
+                removeParticipantElement(child);
+            } else {
+                childrenLeft.push(child);
+            }
+
+        }
+
+        let keyIndex = 0;
+
+        for (index = 0; index < childrenLeft.length; index ++) {
+
+            let child = childrenLeft[index];
+            let childId = parseInt(child.getAttribute("peer_id"));
+            let inserted = true;
+            while(inserted) {
+                let id = keys[keyIndex];
+                if(id !== peerId) {
+                    if (id !== childId) {
+                        let newChild = createParticipantElement(peersMap.get(id), true);
+                        newChild.classList.add("peer_style_new");
+                        list.insertBefore(newChild, child);
+                        childrenNew.push(newChild);
+                    } else {
+                        inserted = false;
+                    }
+                }
+                keyIndex++;
+            }
+        }
+
+        for (index = keyIndex; index < keys.length; index ++) {
+            let id = keys[index];
+            if(id !== peerId) {
+                let newChild = createParticipantElement(peersMap.get(id), true);
+                newChild.classList.add("peer_style_new");
+                list.append(newChild);
+                childrenNew.push(newChild);
+            }
+        }
+
+        for (index = 0; index < childrenNew.length; index ++) {
+            let child = childrenNew[index];
+            window.getComputedStyle(child).opacity;
+            childrenNew[index].classList.remove("peer_style_new");
+        }
+
+    }
 
 }
 
@@ -167,7 +263,6 @@ socket.onmessage = function(event) {
             }
 
             updateParticipants();
-
             break;
 
         case 1: // joined
@@ -182,6 +277,20 @@ socket.onmessage = function(event) {
             postSystemMessage(message);
             peersMap.delete(message.peerId);
             updateParticipants();
+            /*
+            let peerElem = document.getElementById("peer_" + message.peerId);
+            let transitionCounter = 0;
+            peerElem.classList.add("participant_deleted");
+            peerElem.addEventListener('transitionstart', function() {
+                transitionCounter ++;
+            });
+            peerElem.addEventListener('transitionend', function() {
+                transitionCounter --;
+                if(transitionCounter == 0) {
+                    peerElem.parentNode.removeChild(peerElem);
+                }
+            });
+             */
             break;
         case 3: // message
             postChatMessage(message);
