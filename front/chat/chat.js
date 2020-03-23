@@ -110,6 +110,12 @@ function addParticipant(peer, parent) {
     parent.append(createParticipantElement(peer));
 }
 
+function cmpPeers(a, b) {
+    if(a.peerName < b.peerName) { return -1; }
+    if(a.peerName > b.peerName) { return 1; }
+    return 0;
+}
+
 function createParticipantsList() {
     let list = document.getElementById('chat_participants');
     let allPeersElem = document.createElement('div');
@@ -131,15 +137,14 @@ function createParticipantsList() {
     otherPeersElem.id = "peers_other";
     allPeersElem.append(otherPeersElem);
 
-    let keys = Array.from(peersMap.keys());
-    keys.sort();
+    let peers = Array.from(peersMap.values());
+    peers.sort(cmpPeers);
 
-    for (index = 0; index < keys.length; index++) {
+    for (index = 0; index < peers.length; index++) {
 
-        let id = keys[index];
+        let peer = peers[index];
 
-        if (id !== peerId) {
-            let peer = peersMap.get(id);
+        if (peer.peerId !== peerId) {
             addParticipant(peer, otherPeersElem);
         }
     }
@@ -157,8 +162,8 @@ function updateParticipants() {
         let countElem = document.getElementById('participant_count');
         countElem.textContent = "Participants: " + peersMap.size;
 
-        let keys = Array.from(peersMap.keys());
-        keys.sort();
+        let peers = Array.from(peersMap.values());
+        peers.sort(cmpPeers);
 
         let list = document.getElementById('peers_other');
         let children = list.children;
@@ -176,7 +181,7 @@ function updateParticipants() {
 
         }
 
-        let keyIndex = 0;
+        let peerIndex = 0;
 
         for (index = 0; index < childrenLeft.length; index ++) {
 
@@ -184,10 +189,10 @@ function updateParticipants() {
             let childId = parseInt(child.getAttribute("peer_id"));
             let inserted = true;
             while(inserted) {
-                let id = keys[keyIndex];
-                if(id !== peerId) {
-                    if (id !== childId) {
-                        let newChild = createParticipantElement(peersMap.get(id), true);
+                let peer = peers[peerIndex];
+                if(peer.peerId !== peerId) {
+                    if (peer.peerId !== childId) {
+                        let newChild = createParticipantElement(peer);
                         newChild.classList.add("peer_style_new");
                         list.insertBefore(newChild, child);
                         childrenNew.push(newChild);
@@ -195,14 +200,14 @@ function updateParticipants() {
                         inserted = false;
                     }
                 }
-                keyIndex++;
+                peerIndex++;
             }
         }
 
-        for (index = keyIndex; index < keys.length; index ++) {
-            let id = keys[index];
-            if(id !== peerId) {
-                let newChild = createParticipantElement(peersMap.get(id), true);
+        for (index = peerIndex; index < peers.length; index ++) {
+            let peer = peers[index];
+            if(peer.peerId !== peerId) {
+                let newChild = createParticipantElement(peer);
                 newChild.classList.add("peer_style_new");
                 list.append(newChild);
                 childrenNew.push(newChild);
@@ -277,20 +282,6 @@ socket.onmessage = function(event) {
             postSystemMessage(message);
             peersMap.delete(message.peerId);
             updateParticipants();
-            /*
-            let peerElem = document.getElementById("peer_" + message.peerId);
-            let transitionCounter = 0;
-            peerElem.classList.add("participant_deleted");
-            peerElem.addEventListener('transitionstart', function() {
-                transitionCounter ++;
-            });
-            peerElem.addEventListener('transitionend', function() {
-                transitionCounter --;
-                if(transitionCounter == 0) {
-                    peerElem.parentNode.removeChild(peerElem);
-                }
-            });
-             */
             break;
         case 3: // message
             postChatMessage(message);
