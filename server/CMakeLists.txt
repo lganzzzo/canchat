@@ -10,8 +10,11 @@ include_directories(src)
 
 add_library(${project_name}-lib
         src/AppComponent.hpp
+        src/controller/FileController.hpp
         src/controller/RoomsController.hpp
         src/controller/StaticController.hpp
+        src/rooms/File.cpp
+        src/rooms/File.hpp
         src/rooms/Peer.cpp
         src/rooms/Peer.hpp
         src/rooms/Room.cpp
@@ -20,7 +23,9 @@ add_library(${project_name}-lib
         src/rooms/Lobby.hpp
         src/utils/Nickname.cpp
         src/utils/Nickname.hpp
-        src/dto/DTOs.hpp src/dto/DTOs.cpp)
+        src/dto/DTOs.hpp
+        src/dto/DTOs.cpp
+)
 
 ## link libs
 

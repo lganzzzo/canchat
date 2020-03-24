@@ -48,6 +48,50 @@ function postChatMessage(message) {
 
 }
 
+function postSharedFile(message) {
+
+    let messageElem = document.createElement('div');
+
+    if (message.peerId == peerId) {
+        messageElem.className = "message-container-me";
+    } else {
+        messageElem.className = "message-container";
+    }
+
+    let messageDiv = document.createElement('div');
+    messageDiv.className = "message-div";
+
+    if (message.peerId == peerId) {
+        messageDiv.style.backgroundColor = "#E0F7FA";
+    } else {
+        messageDiv.classList.add("peer_style_" + (message.peerId % bulbColorsNumber));
+    }
+
+    let peerName = document.createElement('p');
+    let ts = new Date(message.timestamp / 1000);
+    peerName.className = "message-author";
+    peerName.textContent = message.peerName + " at " + ts.toLocaleString();
+
+    let messageText = document.createElement('pre');
+    messageText.className = "message-text";
+    messageText.textContent = message.file.name + " " + message.file.size + " bytes.";
+
+    messageDiv.append(peerName);
+    messageDiv.append(messageText);
+    messageElem.append(messageDiv);
+
+    let messageField = document.getElementById('chat_history');
+    let scrollPos = messageField.scrollHeight - messageField.scrollTop;
+
+    if(scrollPos <= messageField.getBoundingClientRect().height) {
+        messageField.append(messageElem);
+        messageField.scrollTop = messageField.scrollHeight;
+    } else {
+        messageField.append(messageElem);
+    }
+
+}
+
 function postSystemMessage(message) {
 
     let messageElem = document.createElement('div');
@@ -230,6 +274,22 @@ document.forms.publish.onsubmit = function() {
 
     let text = outgoingMessage.replace(/\s/g,''); // check if text not empty (remove all whitespaces)
 
+    if(text == "/file") {
+        let message = {
+            peerId: peerId,
+            peerName: peerName,
+            code: 5,
+            file: {
+                name: "hello.txt",
+                clientFileId: 1,
+                size: 12
+            }
+        }
+        socket.send(JSON.stringify(message));
+        this.message.value = "";
+        return false;
+    }
+
     if(text !== "") {
         let message = {
             peerId: peerId,
@@ -285,6 +345,10 @@ socket.onmessage = function(event) {
             break;
         case 3: // message
             postChatMessage(message);
+            break;
+
+        case 4: // file
+            postSharedFile(message);
             break;
 
     }

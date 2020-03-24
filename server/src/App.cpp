@@ -1,4 +1,5 @@
 
+#include "controller/FileController.hpp"
 #include "controller/RoomsController.hpp"
 #include "controller/StaticController.hpp"
 
@@ -22,6 +23,9 @@ void run() {
 
   auto staticController = std::make_shared<StaticController>();
   staticController->addEndpointsToRouter(router);
+
+  auto fileController = std::make_shared<FileController>();
+  fileController->addEndpointsToRouter(router);
 
   /* Get connection handler component */
   OATPP_COMPONENT(std::shared_ptr<oatpp::network::server::ConnectionHandler>, connectionHandler, "http");

@@ -64,7 +64,48 @@ oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebS
     message->peerName = m_nickname;
     message->timestamp = oatpp::base::Environment::getMicroTickCount();
 
-    m_room->sendMessage(message);
+    if(!message->code) {
+      throw std::runtime_error("No message code provided.");
+    }
+
+    switch(message->code->getValue()) {
+
+      case MessageCodes::CODE_PEER_JOINED: m_room->sendMessage(message); break;
+      case MessageCodes::CODE_PEER_LEFT: m_room->sendMessage(message); break;
+      case MessageCodes::CODE_PEER_MESSAGE: m_room->sendMessage(message); break;
+      case MessageCodes::CODE_PEER_MESSAGE_FILE: m_room->sendMessage(message); break;
+      case MessageCodes::CODE_FILE_SHARE:
+        {
+          auto fileDto = message->file;
+
+          if (!fileDto) throw std::runtime_error("File structure is not provided.");
+          if (!fileDto->clientFileId) throw std::runtime_error("File clientId is not provided.");
+          if (!fileDto->name) throw std::runtime_error("File name is not provided.");
+          if (!fileDto->size) throw std::runtime_error("File size is not provided.");
+
+          auto file = m_room->shareFile(m_userId, fileDto->clientFileId->getValue(), fileDto->name, fileDto->size->getValue());
+
+          auto fileMessage = MessageDto::createShared();
+          fileMessage->code = MessageCodes::CODE_PEER_MESSAGE_FILE;
+          fileMessage->peerId = m_userId;
+          fileMessage->peerName = m_nickname;
+          fileMessage->timestamp = oatpp::base::Environment::getMicroTickCount();
+
+          auto sharedFile = FileDto::createShared();
+          sharedFile->serverFileId = file->getServerFileId();
+          sharedFile->name = file->getFileName();
+          sharedFile->size = file->getFileSize();
+
+          fileMessage->file = sharedFile;
+
+          m_room->sendMessage(fileMessage);
+
+        }
+        break;
+
+      default:
+        throw std::runtime_error("Invalid client message code.");
+    }
 
   } else if(size > 0) { // message frame received
     m_messageBuffer.writeSimple(data, size);

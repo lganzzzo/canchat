@@ -71,12 +71,20 @@ public:
   }());
 
   /**
+   *  Create chat lobby component.
+   */
+  OATPP_CREATE_COMPONENT(std::shared_ptr<Lobby>, lobby)([] {
+    return std::make_shared<Lobby>();
+  }());
+
+  /**
    *  Create websocket connection handler
    */
   OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::server::ConnectionHandler>, websocketConnectionHandler)("websocket", [] {
     OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor);
+    OATPP_COMPONENT(std::shared_ptr<Lobby>, lobby);
     auto connectionHandler = oatpp::websocket::AsyncConnectionHandler::createShared(executor);
-    connectionHandler->setSocketInstanceListener(std::make_shared<Lobby>());
+    connectionHandler->setSocketInstanceListener(lobby);
     return connectionHandler;
   }());
 
