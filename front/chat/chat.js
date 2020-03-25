@@ -8,7 +8,13 @@ let socket = new WebSocket(urlWebsocket);
 let peedId = null;
 let peerName = null;
 let peersMap = new Map();
+let filesIdCounter = 1;
+let filesMap = new Map();
 let bulbColorsNumber = 18;
+
+function nextFileId() {
+    return filesIdCounter ++;
+}
 
 function postChatMessage(message) {
 
@@ -283,20 +289,63 @@ function updateParticipants() {
 
 function sendFileChunk(chunkInfo) {
 
-    let data = btoa("Hello World!\n");
+    let file = filesMap.get(chunkInfo.clientFileId);
+    if(file) {
 
-    let chunkData = {
-        serverFileId: chunkInfo.serverFileId,
-        subscriberId: chunkInfo.subscriberId,
-        data: data
+        let posEnd = chunkInfo.chunkPosition + chunkInfo.chunkSize;
+        if(posEnd > file.size) {
+            posEnd = file.size;
+        }
+
+        let chunk = file.slice(chunkInfo.chunkPosition, posEnd);
+
+        var reader = new FileReader();
+        reader.readAsBinaryString(chunk);
+        reader.onloadend = function() {
+
+            let data = btoa(reader.result);
+
+            let chunkData = {
+                serverFileId: chunkInfo.serverFileId,
+                subscriberId: chunkInfo.subscriberId,
+                data: data
+            }
+
+            let message = {
+                peerId: peerId,
+                code: 7,
+                file: chunkData
+            }
+            
+            socket.send(JSON.stringify(message));
+
+        }
+
     }
 
-    let message = {
-        peerId: peerId,
-        code: 7,
-        file: chunkData
+}
+
+function handleFiles(files) {
+
+    for(index = 0; index < files.length; index ++ ) {
+
+        let file = files[index];
+        let fileId = nextFileId();
+
+        filesMap.set(fileId, file);
+
+        let message = {
+            code: 5,
+            file: {
+                name: file.name,
+                clientFileId: fileId,
+                size: file.size
+            }
+        }
+
+        socket.send(JSON.stringify(message));
+
     }
-    socket.send(JSON.stringify(message));
 
 }
 
@@ -305,22 +354,6 @@ document.forms.publish.onsubmit = function() {
     let outgoingMessage = this.message.value;
 
     let text = outgoingMessage.replace(/\s/g,''); // check if text not empty (remove all whitespaces)
-
-    if(text == "/file") {
-        let message = {
-            peerId: peerId,
-            peerName: peerName,
-            code: 5,
-            file: {
-                name: "hello.txt",
-                clientFileId: 1,
-                size: 13 * 10
-            }
-        }
-        socket.send(JSON.stringify(message));
-        this.message.value = "";
-        return false;
-    }
 
     if(text !== "") {
         let message = {
