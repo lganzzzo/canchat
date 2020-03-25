@@ -1,4 +1,10 @@
-let socket = new WebSocket("%%%URL%%%");
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Variables add by server:
+// - urlWebsocket
+// - urlRoom
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+let socket = new WebSocket(urlWebsocket);
 let peedId = null;
 let peerName = null;
 let peersMap = new Map();
@@ -74,11 +80,18 @@ function postSharedFile(message) {
 
     let messageText = document.createElement('pre');
     messageText.className = "message-text";
-    messageText.textContent = message.file.name + " " + message.file.size + " bytes.";
+    messageText.textContent = message.file.size + " bytes.";
+
+    let link = document.createElement('a');
+    var linkText = document.createTextNode(message.file.name);
+    link.appendChild(linkText);
+    link.title = "my title text";
+    link.href = urlRoom + "/file/" + message.file.serverFileId;
 
     messageDiv.append(peerName);
     messageDiv.append(messageText);
     messageElem.append(messageDiv);
+    messageDiv.append(link);
 
     let messageField = document.getElementById('chat_history');
     let scrollPos = messageField.scrollHeight - messageField.scrollTop;

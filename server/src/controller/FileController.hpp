@@ -32,17 +32,15 @@ public:
 
     class ReadCallback : public oatpp::data::stream::ReadCallback {
     private:
-      std::shared_ptr<File> m_file;
       std::shared_ptr<File::Subscriber> m_subscriber;
     public:
 
-      ReadCallback(const std::shared_ptr<File>& file)
-        : m_file(file)
-        , m_subscriber(m_file->subscribe())
+      ReadCallback(const std::shared_ptr<File::Subscriber>& subscriber)
+        : m_subscriber(subscriber)
       {}
 
       oatpp::v_io_size read(void *buffer, v_buff_size count, oatpp::async::Action& action) override {
-        return 0;
+        return m_subscriber->readChunk(buffer, count, action);
       }
 
     };
@@ -62,7 +60,7 @@ public:
       OATPP_ASSERT_HTTP(file, Status::CODE_404, "File not found");
 
       auto body = std::make_shared<oatpp::web::protocol::http::outgoing::StreamingBody>
-        (std::make_shared<ReadCallback>(file));
+        (std::make_shared<ReadCallback>(file->subscribe()));
 
       return _return(OutgoingResponse::createShared(Status::CODE_200, body));
     }

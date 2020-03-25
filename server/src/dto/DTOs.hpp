@@ -44,6 +44,7 @@ class FileDto : public oatpp::data::mapping::type::Object {
 
   DTO_FIELD(Int64, chunkPosition);
   DTO_FIELD(Int64, chunkSize);
+  DTO_FIELD(Int64, subscriberId);
 
 };
 

@@ -58,10 +58,17 @@ public:
     ENDPOINT_ASYNC_INIT(ChatJS)
 
     Action act() override {
-      /*static*/ auto fileCache = loadFile(FRONT_PATH "/chat/chat.js")->std_str();
-      oatpp::String url = "wss://" CHAT_HOST "/api/ws/room/" + request->getPathVariable("roomId");
-      auto text = std::regex_replace(fileCache, std::regex("%%%URL%%%"), url->std_str());
-      auto response = controller->createResponse(Status::CODE_200, oatpp::String(text.data(), text.size(), true));
+      /*static*/ auto fileCache = loadFile(FRONT_PATH "/chat/chat.js");
+
+      oatpp::data::stream::BufferOutputStream stream;
+
+      stream << "let urlWebsocket = \"wss://" << CHAT_HOST << "/api/ws/room/" << request->getPathVariable("roomId") << "\";\n";
+      stream << "let urlRoom = \"/room/" << request->getPathVariable("roomId") << "\";\n";
+      stream << "\n";
+
+      stream << fileCache;
+
+      auto response = controller->createResponse(Status::CODE_200, stream.toString());
       response->putHeader(Header::CONTENT_TYPE, "text/javascript");
       return _return(response);
     }
