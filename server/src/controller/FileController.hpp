@@ -33,6 +33,7 @@ public:
     class ReadCallback : public oatpp::data::stream::ReadCallback {
     private:
       std::shared_ptr<File::Subscriber> m_subscriber;
+      v_int64 bytes = 0;
     public:
 
       ReadCallback(const std::shared_ptr<File::Subscriber>& subscriber)
@@ -40,7 +41,15 @@ public:
       {}
 
       oatpp::v_io_size read(void *buffer, v_buff_size count, oatpp::async::Action& action) override {
-        return m_subscriber->readChunk(buffer, count, action);
+        auto res = m_subscriber->readChunk(buffer, count, action);
+        if(res > 0) {
+          bytes += res;
+        } else if(res == 0) {
+          if(bytes != 130) {
+            OATPP_LOGE("AAA", "sub=%d, bytes=%d", m_subscriber->getId(), bytes);
+          }
+        }
+        return res;
       }
 
     };

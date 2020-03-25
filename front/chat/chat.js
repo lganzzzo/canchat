@@ -281,6 +281,25 @@ function updateParticipants() {
 
 }
 
+function sendFileChunk(chunkInfo) {
+
+    let data = btoa("Hello World!\n");
+
+    let chunkData = {
+        serverFileId: chunkInfo.serverFileId,
+        subscriberId: chunkInfo.subscriberId,
+        data: data
+    }
+
+    let message = {
+        peerId: peerId,
+        code: 7,
+        file: chunkData
+    }
+    socket.send(JSON.stringify(message));
+
+}
+
 // send message from the form
 document.forms.publish.onsubmit = function() {
     let outgoingMessage = this.message.value;
@@ -295,7 +314,7 @@ document.forms.publish.onsubmit = function() {
             file: {
                 name: "hello.txt",
                 clientFileId: 1,
-                size: 12
+                size: 13 * 10
             }
         }
         socket.send(JSON.stringify(message));
@@ -362,6 +381,10 @@ socket.onmessage = function(event) {
 
         case 4: // file
             postSharedFile(message);
+            break;
+
+        case 6: // CODE_FILE_REQUEST_CHUNK
+            sendFileChunk(message.file);
             break;
 
     }

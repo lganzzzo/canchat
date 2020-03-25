@@ -19,7 +19,8 @@ enum MessageCodes : v_int64 {
   CODE_PEER_MESSAGE_FILE = 4,
 
   CODE_FILE_SHARE = 5,
-  CODE_FILE_REQUEST_CHUNK = 6
+  CODE_FILE_REQUEST_CHUNK = 6,
+  CODE_FILE_CHUNK_DATA = 7
 
 };
 
@@ -45,6 +46,7 @@ class FileDto : public oatpp::data::mapping::type::Object {
   DTO_FIELD(Int64, chunkPosition);
   DTO_FIELD(Int64, chunkSize);
   DTO_FIELD(Int64, subscriberId);
+  DTO_FIELD(String, data); // base64 data
 
 };
 

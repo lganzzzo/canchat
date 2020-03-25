@@ -2,6 +2,8 @@
 #include "Peer.hpp"
 #include "Room.hpp"
 
+#include "oatpp/encoding/Base64.hpp"
+
 void Peer::sendMessage(const MessageDto::ObjectWrapper& message) {
 
   class SendMessageCoroutine : public oatpp::async::Coroutine<SendMessageCoroutine> {
@@ -99,6 +101,24 @@ oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebS
           fileMessage->file = sharedFile;
 
           m_room->sendMessage(fileMessage);
+
+        }
+        break;
+
+      case MessageCodes::CODE_FILE_CHUNK_DATA:
+        {
+          auto fileDto = message->file;
+          if (!fileDto) throw std::runtime_error("File structure is not provided.");
+          if (!fileDto->serverFileId) throw std::runtime_error("File clientId is not provided.");
+          if (!fileDto->subscriberId) throw std::runtime_error("File subscriberId is not provided.");
+          if (!fileDto->data) throw std::runtime_error("File chunk data is not provided.");
+
+          auto file = m_room->getFileById(fileDto->serverFileId->getValue());
+          if(!file) break; // Ignore if file doesn't exist. File may be deleted already.
+          if(file->getHost()->getUserId() != getUserId()) throw std::runtime_error("Wrong file host.");
+
+          auto data = oatpp::encoding::Base64::decode(fileDto->data);
+          file->provideFileChunk(fileDto->subscriberId->getValue(), data);
 
         }
         break;

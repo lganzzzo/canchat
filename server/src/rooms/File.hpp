@@ -54,6 +54,8 @@ public:
 
     ~Subscriber();
 
+    void provideFileChunk(const oatpp::String& data);
+
     oatpp::v_io_size readChunk(void *buffer, v_buff_size count, oatpp::async::Action& action);
 
     v_int64 getId();
@@ -87,6 +89,10 @@ public:
        v_int64 fileSize);
 
   std::shared_ptr<Subscriber> subscribe();
+
+  void provideFileChunk(v_int64 subscriberId, const oatpp::String& data);
+
+  std::shared_ptr<Peer> getHost();
 
   v_int64 getClientFileId();
 

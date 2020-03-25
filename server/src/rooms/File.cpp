@@ -21,6 +21,15 @@ File::Subscriber::~Subscriber() {
   m_file->unsubscribe(m_id);
 }
 
+void File::Subscriber::provideFileChunk(const oatpp::String& data) {
+  std::lock_guard<std::mutex> lock(m_chunkLock);
+  if(m_chunk != nullptr) {
+    throw std::runtime_error("File chunk collision.");
+  }
+  m_chunk = data;
+  m_waitList.notifyAll();
+}
+
 void File::Subscriber::requestChunk(v_int64 size) {
 
   std::lock_guard<std::mutex> lock(m_file->m_subscribersLock);
@@ -31,9 +40,14 @@ void File::Subscriber::requestChunk(v_int64 size) {
     message->code = MessageCodes::CODE_FILE_REQUEST_CHUNK;
 
     auto file = FileDto::createShared();
+    file->clientFileId = m_file->m_clientFileId;
+    file->serverFileId = m_file->m_serverFileId;
+    file->subscriberId = m_id;
+
     file->chunkPosition = m_progress;
     file->chunkSize = size;
-    file->subscriberId = m_id;
+
+    message->file = file;
 
     m_file->m_host->sendMessage(message);
 
@@ -73,12 +87,14 @@ oatpp::v_io_size File::Subscriber::readChunk(void *buffer, v_buff_size count, oa
   if(m_progress < m_file->getFileSize()) {
 
     if (m_chunk) {
-      if(m_chunk->getSize() > count) {
+      v_int64 chunkSize = m_chunk->getSize();
+      if(chunkSize > count) {
         throw std::runtime_error("Invalid chunk size");
       }
-      std::memcpy(buffer, m_chunk->getData(), m_chunk->getSize());
-      m_progress += m_chunk->getSize();
-      return m_chunk->getSize();
+      std::memcpy(buffer, m_chunk->getData(), chunkSize);
+      m_progress += chunkSize;
+      m_chunk = nullptr;
+      return chunkSize;
     }
 
     requestChunk(count);
@@ -116,6 +132,7 @@ File::File(const std::shared_ptr<Peer>& host,
 {}
 
 void File::unsubscribe(v_int64 id) {
+  std::lock_guard<std::mutex> lock(m_subscribersLock);
   m_subscribers.erase(id);
 }
 
@@ -124,6 +141,21 @@ std::shared_ptr<File::Subscriber> File::subscribe() {
   auto s = std::make_shared<Subscriber>(m_subscriberIdCounter ++, shared_from_this());
   m_subscribers[s->getId()] = s.get();
   return s;
+}
+
+void File::provideFileChunk(v_int64 subscriberId, const oatpp::String& data) {
+
+  std::lock_guard<std::mutex> lock(m_subscribersLock);
+  auto it = m_subscribers.find(subscriberId);
+
+  if(it != m_subscribers.end()) {
+    it->second->provideFileChunk(data);
+  } // else ignore.
+
+}
+
+std::shared_ptr<Peer> File::getHost() {
+  return m_host;
 }
 
 v_int64 File::getClientFileId() {
