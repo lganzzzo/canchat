@@ -3,6 +3,7 @@
 #define ASYNC_SERVER_ROOMS_PEER_HPP
 
 #include "dto/DTOs.hpp"
+#include "rooms/File.hpp"
 
 #include "oatpp-websocket/AsyncWebSocket.hpp"
 
@@ -33,6 +34,7 @@ private:
   std::shared_ptr<Room> m_room;
   oatpp::String m_nickname;
   v_int64 m_userId;
+  std::list<std::shared_ptr<File>> m_files;
 private:
 
   /**
@@ -76,6 +78,17 @@ public:
    * @return
    */
   v_int64 getUserId();
+
+  /**
+   * Add file shared by user. (for indexing purposes)
+   */
+  void addFile(const std::shared_ptr<File>& file);
+
+  /**
+   * List of shared by user files.
+   * @return
+   */
+  const std::list<std::shared_ptr<File>>& getFiles();
 
 public: // WebSocket Listener methods
 

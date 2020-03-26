@@ -14,6 +14,15 @@ std::shared_ptr<Room> Lobby::getOrCreateRoom(const oatpp::String& roomName) {
   return room;
 }
 
+std::shared_ptr<Room> Lobby::getRoom(const oatpp::String& roomName) {
+  std::lock_guard<std::mutex> lock(m_roomsMutex);
+  auto it = m_rooms.find(roomName);
+  if(it != m_rooms.end()) {
+    return it->second;
+  }
+  return nullptr;
+}
+
 void Lobby::onAfterCreate_NonBlocking(const std::shared_ptr<AsyncWebSocket>& socket, const std::shared_ptr<const ParameterMap>& params) {
 
   auto roomName = params->find("roomName")->second;

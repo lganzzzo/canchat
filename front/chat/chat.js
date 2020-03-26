@@ -1,8 +1,73 @@
-let socket = new WebSocket("%%%URL%%%");
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+// Variables add by server:
+// - urlWebsocket
+// - urlRoom
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+let socket = new WebSocket(urlWebsocket);
 let peedId = null;
 let peerName = null;
 let peersMap = new Map();
+let filesIdCounter = 1;
+let filesMap = new Map();
 let bulbColorsNumber = 18;
+let socketSendBuffer = [];
+
+setupEmoji();
+
+function nextFileId() {
+    return filesIdCounter ++;
+}
+
+function insertAtCursor(myField, myValue) {
+    //IE support
+    if (document.selection) {
+        myField.focus();
+        sel = document.selection.createRange();
+        sel.text = myValue;
+    }
+    //MOZILLA and others
+    else if (myField.selectionStart || myField.selectionStart == '0') {
+        var startPos = myField.selectionStart;
+        var endPos = myField.selectionEnd;
+        myField.value = myField.value.substring(0, startPos)
+            + myValue
+            + myField.value.substring(endPos, myField.value.length);
+    } else {
+        myField.value += myValue;
+    }
+}
+
+function humanFileSize(bytes) {
+    var thresh = 1024;
+    if(Math.abs(bytes) < thresh) {
+        return bytes + ' B';
+    }
+    var units = ['kB','MB','GB','TB','PB','EB','ZB','YB'];
+    var u = -1;
+    do {
+        bytes /= thresh;
+        ++u;
+    } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+    return bytes.toFixed(1) + ' ' + units[u];
+}
+
+function setupEmoji (){
+
+    let div = document.getElementById('emoji');
+    let children = div.children;
+
+    for (index = 0; index < children.length; index ++) {
+
+        let child = children[index];
+        child.addEventListener('click', function() {
+            let input = document.getElementById('chat_input');
+            insertAtCursor(input, child.textContent);
+            input.focus();
+        });
+
+    }
+}
 
 function postChatMessage(message) {
 
@@ -34,6 +99,67 @@ function postChatMessage(message) {
 
     messageDiv.append(peerName);
     messageDiv.append(messageText);
+    messageElem.append(messageDiv);
+
+    let messageField = document.getElementById('chat_history');
+    let scrollPos = messageField.scrollHeight - messageField.scrollTop;
+
+    if(scrollPos <= messageField.getBoundingClientRect().height) {
+        messageField.append(messageElem);
+        messageField.scrollTop = messageField.scrollHeight;
+    } else {
+        messageField.append(messageElem);
+    }
+
+}
+
+function postSharedFile(message) {
+
+    let messageElem = document.createElement('div');
+
+    if (message.peerId == peerId) {
+        messageElem.className = "message-container-me";
+    } else {
+        messageElem.className = "message-container";
+    }
+
+    let messageDiv = document.createElement('div');
+    messageDiv.className = "message-div";
+
+    if (message.peerId == peerId) {
+        messageDiv.style.backgroundColor = "#E0F7FA";
+    } else {
+        messageDiv.classList.add("peer_style_" + (message.peerId % bulbColorsNumber));
+    }
+
+    let peerName = document.createElement('p');
+    let ts = new Date(message.timestamp / 1000);
+    peerName.className = "message-author";
+    peerName.textContent = message.peerName + " at " + ts.toLocaleString();
+
+    let fileInfoSize = document.createElement('p');
+    fileInfoSize.className = "file-info-size";
+    fileInfoSize.textContent = "Size: " + humanFileSize(message.file.size);
+
+    let link = document.createElement('a');
+    var linkText = document.createTextNode(message.file.name);
+    link.appendChild(linkText);
+    link.href = urlRoom + "/file/" + message.file.serverFileId;
+    link.setAttribute('target', '_blank');
+
+    messageDiv.append(peerName);
+    messageDiv.append(link);
+    messageDiv.append(fileInfoSize);
+
+    if (message.peerId == peerId) {
+        let fileInfoSent = document.createElement('p');
+        fileInfoSent.className = "file-info-served";
+        fileInfoSent.id = "file_served_" + message.file.serverFileId;
+        fileInfoSent.textContent = "Sent: " + humanFileSize(0);
+        fileInfoSent.setAttribute("amount-sent", "0");
+        messageDiv.append(fileInfoSent);
+    }
+
     messageElem.append(messageDiv);
 
     let messageField = document.getElementById('chat_history');
@@ -224,6 +350,76 @@ function updateParticipants() {
 
 }
 
+function sendFileChunk(chunkInfo) {
+
+    let file = filesMap.get(chunkInfo.clientFileId);
+    if(file) {
+
+        var posEnd = chunkInfo.chunkPosition + chunkInfo.chunkSize;
+        if(posEnd > file.size) {
+            posEnd = file.size;
+        }
+
+        let chunk = file.slice(chunkInfo.chunkPosition, posEnd);
+
+        var reader = new FileReader();
+        reader.readAsBinaryString(chunk);
+        reader.onloadend = function() {
+
+            let data = btoa(reader.result);
+
+            let chunkData = {
+                serverFileId: chunkInfo.serverFileId,
+                subscriberId: chunkInfo.subscriberId,
+                data: data
+            }
+
+            let message = {
+                peerId: peerId,
+                code: 7,
+                file: chunkData
+            }
+
+            socketSendNextData(JSON.stringify(message));
+
+            let chunkSize = posEnd - chunkInfo.chunkPosition;
+            let sentLabel = document.getElementById("file_served_" + chunkInfo.serverFileId);
+            let sent = parseInt(sentLabel.getAttribute("amount-sent"));
+            let total = sent + chunkSize;
+            sentLabel.setAttribute("amount-sent", total.toString());
+            sentLabel.textContent = "Sent: " + humanFileSize(total);
+
+        }
+
+    }
+
+}
+
+function handleFiles(files) {
+
+    for(index = 0; index < files.length; index ++ ) {
+
+        let file = files[index];
+        let fileId = nextFileId();
+
+        filesMap.set(fileId, file);
+
+        let message = {
+            code: 5,
+            file: {
+                name: file.name,
+                clientFileId: fileId,
+                size: file.size
+            }
+        }
+
+        socketSendNextData(JSON.stringify(message));
+        document.getElementById('file_share_button').value = "";
+
+    }
+
+}
+
 // send message from the form
 document.forms.publish.onsubmit = function() {
     let outgoingMessage = this.message.value;
@@ -237,7 +433,7 @@ document.forms.publish.onsubmit = function() {
             code: 3,
             message: outgoingMessage
         }
-        socket.send(JSON.stringify(message));
+        socketSendNextData(JSON.stringify(message));
         this.message.value = "";
     }
 
@@ -287,7 +483,18 @@ socket.onmessage = function(event) {
             postChatMessage(message);
             break;
 
+        case 4: // file
+            postSharedFile(message);
+            break;
+
+        case 6: // CODE_FILE_REQUEST_CHUNK
+            sendFileChunk(message.file);
+            break;
+
     }
 
 }
 
+function socketSendNextData(data) {
+    socket.send(data);
+}

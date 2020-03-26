@@ -54,24 +54,23 @@
 
         #chat_history {
             position: absolute;
-            bottom:0;
+            bottom: 142px;
             top: 0;
             left:0;
             right: 260px;
-            border: 2px solid #ECEFF1;
+            border: 2px solid #F5F5F5;
             overflow: scroll;
-            margin-bottom: 102px;
             padding: 2px;
             border-radius: 3px;
         }
 
         #chat_input_container {
-            background-color: #ECEFF1;
+            background-color: #F5F5F5;
             position: absolute;
             bottom:0;
             left:0;
             right: 260px;
-            height: 100px;
+            height: 140px;
             border-radius: 3px;
         }
 
@@ -81,16 +80,17 @@
             top: 0;
             right: 0;
             width: 250px;
-            border: 2px solid #ECEFF1;
+            border: 2px solid #F5F5F5;
             border-radius: 3px;
             overflow: scroll;
             padding: 2px;
         }
 
         form {
-            display: block;
+            position: absolute;
             width: 100%;
-            height: 100%;
+            top: 40px;
+            bottom: 0;
             overflow: hidden;
         }
 
@@ -147,6 +147,10 @@
             border-radius: 3px;
         }
 
+        .input-button:hover {
+            background-color: #FAFAFA;
+        }
+
         .input-button:active {
             background-color: #E0F7FA;
         }
@@ -193,7 +197,34 @@
             white-space: -pre-wrap;      /* Opera 4-6 */
             white-space: -o-pre-wrap;    /* Opera 7 */
             word-wrap: break-word;       /* Internet Explorer 5.5+ */
+        }
 
+        .message-div a {
+            display: block;
+            text-align: left;
+            margin: 7px 0 7px 0;
+            padding: 5px 10px 5px 10px;
+            text-decoration: none;
+            text-align: center;
+            background-color: #448AFF;
+            color: white;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        .message-div a:hover {
+            background-color: #2979FF;
+        }
+
+        .file-info-size {
+            margin: 0;
+            text-align: left;
+            font-family: monospace;
+        }
+
+        .file-info-served {
+            margin: 0;
+            text-align: left;
+            font-family: monospace;
         }
 
         .participant {
@@ -230,9 +261,73 @@
         }
 
         #chat_container hr {
-            border: 1px solid #ECEFF1;
+            border: 1px solid #F5F5F5;
             width: 30px;
             color: red;
+        }
+
+        #emoji {
+            position: absolute;
+            overflow: scroll;
+            top: 2px;
+            left: 2px;
+            right: 102px;
+            height: 34px;
+            padding: 2px 5px 2px 5px;
+            background-color: white;
+            border-radius: 3px;
+        }
+
+        #emoji p {
+            display: table-cell;
+            font-size: 24px;
+            border-radius: 3px;
+            padding: 0 3px 0 3px;
+            cursor: pointer;
+        }
+
+        #emoji p:hover {
+            background-color: #FAFAFA;
+        }
+
+        #emoji p:active {
+            background-color: #E0F7FA;
+        }
+
+        #file_share_div {
+            position: absolute;
+            overflow: hidden;
+            right: 0px;
+            top: 0px;
+            width: 100px;
+            height: 40px;
+        }
+
+        #file_share_button_overlay {
+            position: absolute;
+            border: none;
+            outline: none;
+            padding: 9px 20px;
+            display: inline-block;
+            cursor: pointer;
+            right: 0px;
+            height: 38px;
+            width: 98px;
+            margin: 2px;
+            font-size: 14px;
+            border-radius: 3px;
+        }
+
+        #file_share_button_overlay:hover {
+            background-color: #FAFAFA;
+        }
+
+        #file_share_button_overlay:active {
+            background-color: #E0F7FA;
+        }
+
+        #file_share_button {
+            display: none;
         }
 
     </style>
@@ -245,6 +340,31 @@
         <div id="chat_history"></div>
 
         <div id="chat_input_container">
+            <div id="emoji">
+                <p>&#128513;</p>
+                <p>&#128521;</p>
+                <p>&#128528;</p>
+                <p>&#128532;</p>
+                <p>&#128534;</p>
+                <p>&#128536;</p>
+                <p>&#128139;</p>
+                <p>&#128175;</p>
+                <p>&#128077;</p>
+                <p>&#128078;</p>
+                <p>&#9757;</p>
+                <p>&#8986;</p>
+                <p>&#9749;</p>
+                <p>&#128064;</p>
+                <p>&#128066;</p>
+                <p>&#128068;</p>
+                <p>&#128181;</p>
+                <p>&#128179;</p>
+                <p>&#128176;</p>
+            </div>
+            <div id="file_share_div" >
+                <input id="file_share_button_overlay" type="submit" value="Share File" onclick="document.getElementById('file_share_button').click();">
+                <input id="file_share_button" type="file" onchange="handleFiles(this.files)" value="Share File">
+            </div>
             <form name="publish" autocomplete="off">
                 <div id="ta-container">
                     <div id="ta-div">
