@@ -53,8 +53,26 @@ std::shared_ptr<Peer> Room::getPeerById(v_int64 userId) {
 }
 
 void Room::removePeerByUserId(v_int64 userId) {
-  std::lock_guard<std::mutex> guard(m_peerByIdLock);
-  m_peerById.erase(userId);
+
+  auto peer = getPeerById(userId);
+  if(peer) {
+
+    {
+      std::lock_guard<std::mutex> guard(m_fileByIdLock);
+      for (const auto &file : peer->getFiles()) {
+        file->clearSubscribers();
+        m_fileById.erase(file->getServerFileId());
+      }
+
+    }
+
+    {
+      std::lock_guard<std::mutex> guard(m_peerByIdLock);
+      m_peerById.erase(userId);
+    }
+
+  }
+
 }
 
 std::shared_ptr<File> Room::shareFile(v_int64 hostUserId, v_int64 clientFileId, const oatpp::String& fileName, v_int64 fileSize) {
@@ -63,6 +81,7 @@ std::shared_ptr<File> Room::shareFile(v_int64 hostUserId, v_int64 clientFileId, 
   if(!host) throw std::runtime_error("File host not found.");
   v_int64 serverFileId = m_fileIdCounter ++;
   auto file = std::make_shared<File>(host, clientFileId, serverFileId, fileName, fileSize);
+  host->addFile(file);
   m_fileById[serverFileId] = file;
   return file;
 }

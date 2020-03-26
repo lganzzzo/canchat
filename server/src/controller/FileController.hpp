@@ -62,7 +62,10 @@ public:
       auto body = std::make_shared<oatpp::web::protocol::http::outgoing::StreamingBody>
         (std::make_shared<ReadCallback>(file->subscribe()));
 
-      return _return(OutgoingResponse::createShared(Status::CODE_200, body));
+      auto response = OutgoingResponse::createShared(Status::CODE_200, body);
+      response->putHeader("content-disposition", "attachment; filename=\"" + file->getFileName() +"\"");
+
+      return _return(response);
     }
 
   };

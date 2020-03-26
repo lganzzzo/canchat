@@ -11,9 +11,62 @@ let peersMap = new Map();
 let filesIdCounter = 1;
 let filesMap = new Map();
 let bulbColorsNumber = 18;
+let socketSendBuffer = [];
+
+setupEmoji();
 
 function nextFileId() {
     return filesIdCounter ++;
+}
+
+function insertAtCursor(myField, myValue) {
+    //IE support
+    if (document.selection) {
+        myField.focus();
+        sel = document.selection.createRange();
+        sel.text = myValue;
+    }
+    //MOZILLA and others
+    else if (myField.selectionStart || myField.selectionStart == '0') {
+        var startPos = myField.selectionStart;
+        var endPos = myField.selectionEnd;
+        myField.value = myField.value.substring(0, startPos)
+            + myValue
+            + myField.value.substring(endPos, myField.value.length);
+    } else {
+        myField.value += myValue;
+    }
+}
+
+function humanFileSize(bytes) {
+    var thresh = 1024;
+    if(Math.abs(bytes) < thresh) {
+        return bytes + ' B';
+    }
+    var units = ['kB','MB','GB','TB','PB','EB','ZB','YB'];
+    var u = -1;
+    do {
+        bytes /= thresh;
+        ++u;
+    } while(Math.abs(bytes) >= thresh && u < units.length - 1);
+    return bytes.toFixed(1) + ' ' + units[u];
+}
+
+function setupEmoji (){
+
+    let div = document.getElementById('emoji');
+    let children = div.children;
+
+    for (index = 0; index < children.length; index ++) {
+
+        let child = children[index];
+        child.addEventListener('click', function() {
+            let input = document.getElementById('chat_input');
+            insertAtCursor(input, child.textContent);
+            input.focus();
+        });
+
+    }
 }
 
 function postChatMessage(message) {
@@ -84,20 +137,30 @@ function postSharedFile(message) {
     peerName.className = "message-author";
     peerName.textContent = message.peerName + " at " + ts.toLocaleString();
 
-    let messageText = document.createElement('pre');
-    messageText.className = "message-text";
-    messageText.textContent = message.file.size + " bytes.";
+    let fileInfoSize = document.createElement('p');
+    fileInfoSize.className = "file-info-size";
+    fileInfoSize.textContent = "Size: " + humanFileSize(message.file.size);
 
     let link = document.createElement('a');
     var linkText = document.createTextNode(message.file.name);
     link.appendChild(linkText);
-    link.title = "my title text";
     link.href = urlRoom + "/file/" + message.file.serverFileId;
+    link.setAttribute('target', '_blank');
 
     messageDiv.append(peerName);
-    messageDiv.append(messageText);
-    messageElem.append(messageDiv);
     messageDiv.append(link);
+    messageDiv.append(fileInfoSize);
+
+    if (message.peerId == peerId) {
+        let fileInfoSent = document.createElement('p');
+        fileInfoSent.className = "file-info-served";
+        fileInfoSent.id = "file_served_" + message.file.serverFileId;
+        fileInfoSent.textContent = "Sent: " + humanFileSize(0);
+        fileInfoSent.setAttribute("amount-sent", "0");
+        messageDiv.append(fileInfoSent);
+    }
+
+    messageElem.append(messageDiv);
 
     let messageField = document.getElementById('chat_history');
     let scrollPos = messageField.scrollHeight - messageField.scrollTop;
@@ -292,7 +355,7 @@ function sendFileChunk(chunkInfo) {
     let file = filesMap.get(chunkInfo.clientFileId);
     if(file) {
 
-        let posEnd = chunkInfo.chunkPosition + chunkInfo.chunkSize;
+        var posEnd = chunkInfo.chunkPosition + chunkInfo.chunkSize;
         if(posEnd > file.size) {
             posEnd = file.size;
         }
@@ -316,8 +379,15 @@ function sendFileChunk(chunkInfo) {
                 code: 7,
                 file: chunkData
             }
-            
-            socket.send(JSON.stringify(message));
+
+            socketSendNextData(JSON.stringify(message));
+
+            let chunkSize = posEnd - chunkInfo.chunkPosition;
+            let sentLabel = document.getElementById("file_served_" + chunkInfo.serverFileId);
+            let sent = parseInt(sentLabel.getAttribute("amount-sent"));
+            let total = sent + chunkSize;
+            sentLabel.setAttribute("amount-sent", total.toString());
+            sentLabel.textContent = "Sent: " + humanFileSize(total);
 
         }
 
@@ -343,7 +413,8 @@ function handleFiles(files) {
             }
         }
 
-        socket.send(JSON.stringify(message));
+        socketSendNextData(JSON.stringify(message));
+        document.getElementById('file_share_button').value = "";
 
     }
 
@@ -362,7 +433,7 @@ document.forms.publish.onsubmit = function() {
             code: 3,
             message: outgoingMessage
         }
-        socket.send(JSON.stringify(message));
+        socketSendNextData(JSON.stringify(message));
         this.message.value = "";
     }
 
@@ -424,3 +495,6 @@ socket.onmessage = function(event) {
 
 }
 
+function socketSendNextData(data) {
+    socket.send(data);
+}

@@ -28,7 +28,7 @@ public:
 
       void onNewItem(oatpp::async::CoroutineWaitList& list) override {
         std::lock_guard<std::mutex> lock(m_subscriber->m_chunkLock);
-        if (m_subscriber->m_chunk) {
+        if (m_subscriber->m_chunk || !m_subscriber->m_valid) {
           list.notifyAll();
         }
       }

@@ -32,8 +32,6 @@ void File::Subscriber::provideFileChunk(const oatpp::String& data) {
 
 void File::Subscriber::requestChunk(v_int64 size) {
 
-  std::lock_guard<std::mutex> lock(m_file->m_subscribersLock);
-
   if(m_valid) {
 
     auto message = MessageDto::createShared();
@@ -68,7 +66,7 @@ oatpp::async::CoroutineStarter File::Subscriber::waitForChunkAsync() {
 
     Action act() override {
       std::lock_guard<std::mutex> lock(m_subscriber->m_chunkLock);
-      if(m_subscriber->m_chunk) {
+      if(m_subscriber->m_chunk || !m_subscriber->m_valid) {
         return finish();
       }
       return Action::createWaitListAction(&m_subscriber->m_waitList);
@@ -83,6 +81,10 @@ oatpp::async::CoroutineStarter File::Subscriber::waitForChunkAsync() {
 oatpp::v_io_size File::Subscriber::readChunk(void *buffer, v_buff_size count, oatpp::async::Action& action) {
 
   std::lock_guard<std::mutex> lock(m_chunkLock);
+
+  if(!m_valid) {
+    throw std::runtime_error("File is not valid any more.");
+  }
 
   if(m_progress < m_file->getFileSize()) {
 
@@ -112,7 +114,9 @@ v_int64 File::Subscriber::getId() {
 }
 
 void File::Subscriber::invalidate() {
+  std::lock_guard<std::mutex> lock(m_chunkLock);
   m_valid = false;
+  m_waitList.notifyAll();
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
