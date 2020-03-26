@@ -24,7 +24,6 @@ add_library(${project_name}-lib
         src/utils/Nickname.cpp
         src/utils/Nickname.hpp
         src/dto/DTOs.hpp
-        src/dto/DTOs.cpp
 )
 
 ## link libs
