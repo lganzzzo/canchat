@@ -62,7 +62,7 @@ public:
 
       oatpp::data::stream::BufferOutputStream stream;
 
-      stream << "let urlWebsocket = \"ws://" << CHAT_HOST << "/api/ws/room/" << request->getPathVariable("roomId") << "\";\n";
+      stream << "let urlWebsocket = \"wss://" << CHAT_HOST << "/api/ws/room/" << request->getPathVariable("roomId") << "\";\n";
       stream << "let urlRoom = \"/room/" << request->getPathVariable("roomId") << "\";\n";
       stream << "\n";
 
