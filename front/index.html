@@ -3,9 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <title>Can-Chat</title>
+    <style>
+        body {
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        #container {
+            display: inline-block;
+            max-width: 800px;
+        }
+
+        #note {
+            text-align: left;
+        }
+
+        #note p {
+            color: #555555;
+            font-size: 0.85rem;
+        }
+
+        #starter {
+            display: inline-grid;
+            text-align: center;
+            margin: 0 0 30px 0
+        }
+
+        #starter h2{
+            margin-bottom: 35px;
+        }
+
+        input {
+            display: inline;
+            border: none;
+            outline: none;
+            padding: 9px 20px;
+            cursor: pointer;
+            width: 300px;
+            height: 40px;
+            margin: 0 0 10px 0;
+            font-size: 1rem;
+            border-radius: 3px;
+            background-color: #448AFF;
+            color: white;
+        }
+
+    </style>
 </head>
 <body>
-    Hello!!!
-    <a href="/room/lobby/">Chat!</a>
+
+    <div id="container">
+
+        <h1>Can-Chat</h1>
+
+        <p style="padding-top: 20px;">
+            Welcome to Can-Chat - Anonymous, secure chat!
+        </p>
+
+        <div id="starter">
+
+            <h2>Join Room</h2>
+
+            <input type="button" value="Public Lobby" onclick="startLobby();">
+            <input type="button" value="New Private Room" onclick="startPrivateRoom();">
+
+        </div>
+
+        <p>
+            <i>If you are the first time here, please read the short info below.</i>
+        </p>
+
+        <div id="note">
+
+            <h3>Rooms</h3>
+
+            <p>
+                All communication happens in chat-rooms.
+                Each room has a unique URL.
+                Anyone who has room-URL can join the room.
+                Generating random long enough room-URL gives privacy to participants. Be sure to share room-URL with wanted participants only.
+            </p>
+
+            <p>
+                Rooms are automatically created when the first participant joins the room, and
+                are automatically deleted when the last participant leaves the room.
+            </p>
+
+            <p>
+                No history is maintained within the room.
+                No chat-history is available for newly joined participants.
+            </p>
+
+            <h3>File Sharing</h3>
+
+            <p>
+                Files are streamed directly from the host-peer machine.
+                Nothing is uploaded to the server nor stored in any 3d-party place.
+            </p>
+
+            <p>
+                Once host-peer cancels file-sharing, files are no longer available.
+                If host-peer exits the room, all of its file-sharing is canceled.
+            </p>
+
+            <h3>Warning</h3>
+
+            <p style="color: red">
+                <i>
+                There is NO moderation available in chat-rooms. Chat-rooms are completele private and service owners have no control over the content. <br>
+                This service is NOT recommended for use by sensitive people.
+                </i>
+            </p>
+
+        </div>
+
+    </div>
+
+    <script>
+
+        function uuidv4() {
+            return ([1e7]+-1e3+-4e3+-8e3+-1e11).replace(/[018]/g, c =>
+                (c ^ crypto.getRandomValues(new Uint8Array(1))[0] & 15 >> c / 4).toString(16)
+            );
+        }
+
+        function startLobby() {
+            window.open('/room/lobby', '_blank');
+        }
+
+        function startPrivateRoom() {
+            window.open('/room/' + uuidv4(), '_blank');
+        }
+    </script>
+
 </body>
 </html>

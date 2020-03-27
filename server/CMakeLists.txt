@@ -24,7 +24,7 @@ add_library(${project_name}-lib
         src/utils/Nickname.cpp
         src/utils/Nickname.hpp
         src/dto/DTOs.hpp
-)
+        src/dto/Config.hpp)
 
 ## link libs
 
@@ -59,7 +59,6 @@ add_definitions(
         -DCERT_PEM_PATH="${CMAKE_CURRENT_LIST_DIR}/cert/test_key.pem"
         -DCERT_CRT_PATH="${CMAKE_CURRENT_LIST_DIR}/cert/test_cert.crt"
         -DFRONT_PATH="${CMAKE_CURRENT_LIST_DIR}/../front"
-        -DCHAT_HOST="localhost:8443"
 )
 
 #################################################################

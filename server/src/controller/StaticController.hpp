@@ -27,6 +27,7 @@
 #ifndef StaticController_hpp
 #define StaticController_hpp
 
+#include "dto/Config.hpp"
 #include "oatpp/web/server/api/ApiController.hpp"
 
 #include "oatpp/core/macro/codegen.hpp"
@@ -40,6 +41,9 @@ class StaticController : public oatpp::web::server::api::ApiController {
 private:
   typedef StaticController __ControllerType;
 private:
+
+  OATPP_COMPONENT(ConfigDto::ObjectWrapper, m_config);
+
   static oatpp::String loadFile(const char* filename) {
     auto buffer = oatpp::base::StrBuffer::loadFromFile(filename);
     OATPP_ASSERT_HTTP(buffer, Status::CODE_404, "File Not Found:(");
@@ -56,7 +60,7 @@ public:
     ENDPOINT_ASYNC_INIT(Root)
 
     Action act() override {
-      static auto fileCache = loadFile(FRONT_PATH "/index.html");
+      /*static*/ auto fileCache = loadFile(FRONT_PATH "/index.html");
       auto response = controller->createResponse(Status::CODE_200, fileCache);
       response->putHeader(Header::CONTENT_TYPE, "text/html");
       return _return(response);
@@ -87,7 +91,9 @@ public:
 
       oatpp::data::stream::BufferOutputStream stream;
 
-      stream << "let urlWebsocket = \"wss://" << CHAT_HOST << "/api/ws/room/" << request->getPathVariable("roomId") << "\";\n";
+      auto baseUrl = controller->m_config->getWebsocketBaseUrl();
+
+      stream << "let urlWebsocket = \"" << baseUrl << "/api/ws/room/" << request->getPathVariable("roomId") << "\";\n";
       stream << "let urlRoom = \"/room/" << request->getPathVariable("roomId") << "\";\n";
       stream << "\n";
 

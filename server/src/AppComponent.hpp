@@ -28,6 +28,7 @@
 #define AppComponent_hpp
 
 #include "rooms/Lobby.hpp"
+#include "dto/Config.hpp"
 
 #include "oatpp-libressl/server/ConnectionProvider.hpp"
 #include "oatpp-libressl/Config.hpp"
@@ -38,13 +39,43 @@
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
 
 #include "oatpp/core/macro/component.hpp"
+#include "oatpp/core/base/CommandLineArguments.hpp"
+
+#include "oatpp/core/utils/ConversionUtils.hpp"
 
 /**
  *  Class which creates and holds Application components and registers components in oatpp::base::Environment
  *  Order of components initialization is from top to bottom
  */
 class AppComponent {
+private:
+  oatpp::base::CommandLineArguments m_cmdArgs;
 public:
+  AppComponent(const oatpp::base::CommandLineArguments& cmdArgs)
+    : m_cmdArgs(cmdArgs)
+  {}
+public:
+
+  /**
+   * Create config component
+   */
+  OATPP_CREATE_COMPONENT(ConfigDto::ObjectWrapper, appConfig)([this] {
+
+    auto config = ConfigDto::createShared();
+
+    config->host = m_cmdArgs.getNamedArgumentValue("--host", "localhost");
+    auto portText = m_cmdArgs.getNamedArgumentValue("--port", "8443");
+
+    bool success;
+    auto port = oatpp::utils::conversion::strToUInt32(portText, success);
+    if(!success || port > 65535) {
+      throw std::runtime_error("Invalid port!");
+    }
+
+    config->port = (v_uint16) port;
+    return config;
+
+  }());
 
   /**
    * Create Async Executor
@@ -58,19 +89,28 @@ public:
    */
   OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, serverConnectionProvider)([] {
 
-    OATPP_LOGD("oatpp::libressl::Config", "pem='%s'", CERT_PEM_PATH);
-    OATPP_LOGD("oatpp::libressl::Config", "crt='%s'", CERT_CRT_PATH);
-    auto config = oatpp::libressl::Config::createDefaultServerConfigShared(CERT_CRT_PATH, CERT_PEM_PATH /* private key */);
+    OATPP_COMPONENT(ConfigDto::ObjectWrapper, appConfig);
 
-    /**
-     * if you see such error:
-     * oatpp::libressl::server::ConnectionProvider:Error on call to 'tls_configure'. ssl context failure
-     * It might be because you have several ssl libraries installed on your machine.
-     * Try to make sure you are using libtls, libssl, and libcrypto from the same package
-     */
+    std::shared_ptr<oatpp::network::ServerConnectionProvider> result;
 
-    return oatpp::libressl::server::ConnectionProvider::createShared(config, 8443);
-    //return oatpp::network::server::SimpleTCPConnectionProvider::createShared(8000);
+    if(appConfig->useTLS) {
+
+      OATPP_LOGD("oatpp::libressl::Config", "pem='%s'", CERT_PEM_PATH);
+      OATPP_LOGD("oatpp::libressl::Config", "crt='%s'", CERT_CRT_PATH);
+      auto config = oatpp::libressl::Config::createDefaultServerConfigShared(CERT_CRT_PATH, CERT_PEM_PATH /* private key */);
+
+      /**
+       * if you see such error:
+       * oatpp::libressl::server::ConnectionProvider:Error on call to 'tls_configure'. ssl context failure
+       * It might be because you have several ssl libraries installed on your machine.
+       * Try to make sure you are using libtls, libssl, and libcrypto from the same package
+       */
+      result = oatpp::libressl::server::ConnectionProvider::createShared(config, appConfig->port->getValue());
+    } else {
+      result = oatpp::network::server::SimpleTCPConnectionProvider::createShared(appConfig->port->getValue());
+    }
+
+    return result;
 
   }());
 

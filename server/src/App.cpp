@@ -34,10 +34,10 @@
 
 #include <iostream>
 
-void run() {
+void run(const oatpp::base::CommandLineArguments& args) {
 
   /* Register Components in scope of run() method */
-  AppComponent components;
+  AppComponent components(args);
 
   /* Get router component */
   OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router);
@@ -73,7 +73,7 @@ int main(int argc, const char * argv[]) {
 
   oatpp::base::Environment::init();
 
-  run();
+  run(oatpp::base::CommandLineArguments(argc, argv));
 
   oatpp::base::Environment::destroy();
 
