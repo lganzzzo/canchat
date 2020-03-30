@@ -52,7 +52,9 @@ void Peer::sendMessage(const MessageDto::ObjectWrapper& message) {
 
   };
 
-  m_asyncExecutor->execute<SendMessageCoroutine>(&m_writeLock, m_socket, m_objectMapper->writeToString(message));
+  if(m_socket) {
+    m_asyncExecutor->execute<SendMessageCoroutine>(&m_writeLock, m_socket, m_objectMapper->writeToString(message));
+  }
 
 }
 
@@ -74,6 +76,10 @@ void Peer::addFile(const std::shared_ptr<File>& file) {
 
 const std::list<std::shared_ptr<File>>& Peer::getFiles() {
   return m_files;
+}
+
+void Peer::invalidateSocket() {
+  m_socket.reset();
 }
 
 oatpp::async::CoroutineStarter Peer::onPing(const std::shared_ptr<AsyncWebSocket>& socket, const oatpp::String& message) {

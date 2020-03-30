@@ -72,7 +72,6 @@ void Lobby::onBeforeDestroy_NonBlocking(const std::shared_ptr<AsyncWebSocket>& s
 
   room->goodbyePeer(peer);
 
-  /* Remove circle `std::shared_ptr` dependencies */
-  socket->setListener(nullptr);
+  peer->invalidateSocket();
 
 }

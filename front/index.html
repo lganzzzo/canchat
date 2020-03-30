@@ -39,13 +39,19 @@
             outline: none;
             padding: 9px 20px;
             cursor: pointer;
-            width: 300px;
-            height: 40px;
             margin: 0 0 10px 0;
-            font-size: 1rem;
+            font-size: 2vh;
             border-radius: 3px;
             background-color: #448AFF;
             color: white;
+        }
+
+        input:hover {
+            background-color: #00FF00;
+        }
+
+        input:active {
+            background-color: #0000FF;
         }
 
     </style>
@@ -60,9 +66,9 @@
             Welcome to Can-Chat - Anonymous, secure chat!
         </p>
 
-        <div id="starter">
+        <h2>Join Room</h2>
 
-            <h2>Join Room</h2>
+        <div id="starter">
 
             <input type="button" value="Public Lobby" onclick="startLobby();">
             <input type="button" value="New Private Room" onclick="startPrivateRoom();">

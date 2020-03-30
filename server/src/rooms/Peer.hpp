@@ -115,6 +115,11 @@ public:
    */
   const std::list<std::shared_ptr<File>>& getFiles();
 
+  /**
+   * Remove circle `std::shared_ptr` dependencies
+   */
+  void invalidateSocket();
+
 public: // WebSocket Listener methods
 
   CoroutineStarter onPing(const std::shared_ptr<AsyncWebSocket>& socket, const oatpp::String& message) override;
