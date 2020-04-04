@@ -46,30 +46,26 @@
 
         #chat_container {
             position: absolute;
-            bottom: 10px;
-            top: 10px;
-            left: 10px;
-            right: 10px;
+            width: 100%;
+            height: 100%;
+            background-color: #424242;
         }
 
         #chat_history {
             position: absolute;
-            bottom: 142px;
-            top: 0;
+            bottom: 158px;
+            top: 20px;
             left:0;
-            right: 260px;
-            border: 2px solid #F5F5F5;
+            right: 254px;
             overflow: scroll;
-            padding: 2px;
-            border-radius: 3px;
+            padding: 0;
         }
 
         #chat_input_container {
-            background-color: #F5F5F5;
             position: absolute;
-            bottom:0;
-            left:0;
-            right: 260px;
+            bottom:20px;
+            left:20px;
+            right: 274px;
             height: 140px;
             border-radius: 3px;
         }
@@ -80,16 +76,16 @@
             top: 0;
             right: 0;
             width: 250px;
-            border: 2px solid #F5F5F5;
-            border-radius: 3px;
             overflow: scroll;
             padding: 2px;
+            background-color: #212121;
         }
 
         form {
             position: absolute;
-            width: 100%;
             top: 40px;
+            left: 0;
+            right: 100px;
             bottom: 0;
             overflow: hidden;
         }
@@ -99,7 +95,7 @@
             left: 0;
             top: 0;
             bottom: 0;
-            right: 100px;
+            right: 0;
             padding: 2px;
             border-radius: 3px;
         }
@@ -111,8 +107,8 @@
             bottom: 2px;
             right: 2px;
             padding: 2px 5px 2px 5px;
-            background-color: white;
             border-radius: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         form textarea {
@@ -130,68 +126,44 @@
             font-size: 14px;
             border-radius: 3px;
             font-family: monospace;
-        }
-
-        .input-button {
-            position: absolute;
-            border: none;
-            outline: none;
-            padding: 15px 20px;
-            display: inline-block;
-            cursor: pointer;
-            right: 0px;
-            height: 96px;
-            width: 98px;
-            margin: 2px;
-            font-size: 14px;
-            border-radius: 3px;
-        }
-
-        .input-button:hover {
-            background-color: #FAFAFA;
-        }
-
-        .input-button:active {
-            background-color: #E0F7FA;
+            background-color: rgba(0, 0, 0, 0);
+            color: white;
         }
 
         .message-container {
             text-align: left;
-        }
-
-        .message-container-me {
-            text-align: right;
-        }
-
-        .message-div {
-            display: inline-block;
-            margin: 3px;
-            border-radius: 15px;
-            padding: 5px 20px 15px 20px;
-            max-width: 70%;
+            margin-bottom: 20px;
             font-size: 14px;
         }
 
+        .message-div {
+            padding: 0;
+            margin: 0;
+        }
+
+        .message-bulb {
+            padding: 3px 20px 3px 21px;
+        }
+
+        .message-bulb:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
         .message-div-system {
-            text-align: left;
-            display: inline-block;
-            margin: 3px;
-            border-radius: 15px;
-            padding: 5px 20px 5px 20px;
-            max-width: 70%;
-            font-size: 12px;
+            padding: 3px 20px 3px 21px;
+            margin: 0;
         }
 
         .message-author {
-            margin: 0 0 2px 0;
-            font-size: 12px;
-            color: #AAAAAA;
+            margin: 0 0 5px 21px;
+            font-weight: bold;
+            color: white;
         }
 
         .message-text {
             margin: 0;
             text-align: left;
-
+            color: white;
             white-space: pre-wrap;       /* Since CSS 2.1 */
             white-space: -moz-pre-wrap;  /* Mozilla, since 1999 */
             white-space: -pre-wrap;      /* Opera 4-6 */
@@ -199,32 +171,39 @@
             word-wrap: break-word;       /* Internet Explorer 5.5+ */
         }
 
-        .message-div a {
+        .message-div-files {
+            padding: 0 20px;
+            margin: 0;
+        }
+
+        .message-div-file {
+            display: inline-block;
+            padding: 0 0 7px;
+            margin: 0 10px 10px 0;
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .message-div-files a {
             display: block;
             text-align: left;
-            margin: 7px 0 7px 0;
+            margin: 0 0 7px 0;
             padding: 5px 10px 5px 10px;
             text-decoration: none;
             text-align: center;
             background-color: #448AFF;
             color: white;
             font-family: Arial, Helvetica, sans-serif;
+            border-radius: 1px;
         }
 
-        .message-div a:hover {
+        .message-div-files a:hover {
             background-color: #2979FF;
         }
 
         .file-info-size {
-            margin: 0;
-            text-align: left;
+            margin: 0 10px;
             font-family: monospace;
-        }
-
-        .file-info-served {
-            margin: 0;
-            text-align: left;
-            font-family: monospace;
+            color: white;
         }
 
         .participant {
@@ -271,11 +250,11 @@
             overflow: scroll;
             top: 2px;
             left: 2px;
-            right: 102px;
+            right: 2px;
             height: 34px;
             padding: 2px 5px 2px 5px;
-            background-color: white;
             border-radius: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
         }
 
         #emoji p {
@@ -284,46 +263,50 @@
             border-radius: 3px;
             padding: 0 3px 0 3px;
             cursor: pointer;
+            color: rgba(255, 255, 255, 0.7);
         }
 
         #emoji p:hover {
-            background-color: #FAFAFA;
+            color: rgba(255, 255, 255, 1);
         }
 
         #emoji p:active {
-            background-color: #E0F7FA;
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
         #file_share_div {
             position: absolute;
             overflow: hidden;
             right: 0px;
-            top: 0px;
+            top: 40px;
             width: 100px;
-            height: 40px;
+            height: 100px;
         }
 
         #file_share_button_overlay {
             position: absolute;
             border: none;
             outline: none;
-            padding: 9px 20px;
+            padding: 15px 20px;
             display: inline-block;
             cursor: pointer;
             right: 0px;
-            height: 38px;
+            height: 96px;
             width: 98px;
             margin: 2px;
             font-size: 14px;
             border-radius: 3px;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
         }
 
         #file_share_button_overlay:hover {
-            background-color: #FAFAFA;
+            color: rgba(255, 255, 255, 1);
         }
 
         #file_share_button_overlay:active {
-            background-color: #E0F7FA;
+            color: rgba(255, 255, 255, 1);
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
         #file_share_button {
@@ -338,6 +321,8 @@
     <div id="chat_container">
 
         <div id="chat_history"></div>
+
+        <div id="chat_participants"></div>
 
         <div id="chat_input_container">
             <div id="emoji">
@@ -362,8 +347,8 @@
                 <p>&#128176;</p>
             </div>
             <div id="file_share_div" >
-                <input id="file_share_button_overlay" type="submit" value="Share File" onclick="document.getElementById('file_share_button').click();">
-                <input id="file_share_button" type="file" onchange="handleFiles(this.files)" value="Share File">
+                <input id="file_share_button_overlay" type="submit" value="Share Files" onclick="document.getElementById('file_share_button').click();">
+                <input id="file_share_button" type="file" multiple onchange="handleFiles(this.files)" value="Share Files">
             </div>
             <form name="publish" autocomplete="off">
                 <div id="ta-container">
@@ -375,11 +360,8 @@
                                   maxlength="4096"></textarea>
                     </div>
                 </div>
-                <input class="input-button" type="submit" value="Send">
             </form>
         </div>
-
-        <div id="chat_participants"></div>
 
     </div>
 

@@ -71,37 +71,43 @@ function setupEmoji (){
 
 function postChatMessage(message) {
 
-    let messageElem = document.createElement('div');
+    let messageElem;
 
-    if (message.peerId == peerId) {
-        messageElem.className = "message-container-me";
-    } else {
+    let messageField = document.getElementById('chat_history');
+    let lastChild = messageField.lastChild;
+    if(lastChild) {
+        let lastPeerId = lastChild.getAttribute('peerId');
+        if(lastPeerId && lastPeerId == message.peerId) {
+            messageElem = lastChild;
+        }
+    }
+    if(!messageElem) {
+        messageElem = document.createElement('div');
         messageElem.className = "message-container";
+        messageElem.setAttribute('peerId', message.peerId);
+
+        let peerName = document.createElement('pre');
+        let ts = new Date(message.timestamp / 1000);
+        peerName.className = "message-author";
+        peerName.textContent = message.peerName + " at " + ts.toLocaleTimeString([], {timeStyle: 'short'});
+        messageElem.append(peerName);
     }
 
     let messageDiv = document.createElement('div');
     messageDiv.className = "message-div";
 
-    if (message.peerId == peerId) {
-        messageDiv.style.backgroundColor = "#E0F7FA";
-    } else {
-        messageDiv.classList.add("peer_style_" + (message.peerId % bulbColorsNumber));
-    }
-
-    let peerName = document.createElement('p');
-    let ts = new Date(message.timestamp / 1000);
-    peerName.className = "message-author";
-    peerName.textContent = message.peerName + " at " + ts.toLocaleString();
+    let bulb = document.createElement('div');
+    bulb.className = "message-bulb";
 
     let messageText = document.createElement('pre');
     messageText.className = "message-text";
     messageText.textContent = message.message;
 
-    messageDiv.append(peerName);
-    messageDiv.append(messageText);
+
+    bulb.append(messageText);
+    messageDiv.append(bulb);
     messageElem.append(messageDiv);
 
-    let messageField = document.getElementById('chat_history');
     let scrollPos = messageField.scrollHeight - messageField.scrollTop;
 
     if(scrollPos <= messageField.getBoundingClientRect().height) {
@@ -115,54 +121,67 @@ function postChatMessage(message) {
 
 function postSharedFile(message) {
 
-    let messageElem = document.createElement('div');
-
-    if (message.peerId == peerId) {
-        messageElem.className = "message-container-me";
-    } else {
-        messageElem.className = "message-container";
-    }
-
-    let messageDiv = document.createElement('div');
-    messageDiv.className = "message-div";
-
-    if (message.peerId == peerId) {
-        messageDiv.style.backgroundColor = "#E0F7FA";
-    } else {
-        messageDiv.classList.add("peer_style_" + (message.peerId % bulbColorsNumber));
-    }
-
-    let peerName = document.createElement('p');
-    let ts = new Date(message.timestamp / 1000);
-    peerName.className = "message-author";
-    peerName.textContent = message.peerName + " at " + ts.toLocaleString();
-
-    let fileInfoSize = document.createElement('p');
-    fileInfoSize.className = "file-info-size";
-    fileInfoSize.textContent = "Size: " + humanFileSize(message.file.size);
-
-    let link = document.createElement('a');
-    var linkText = document.createTextNode(message.file.name);
-    link.appendChild(linkText);
-    link.href = urlRoom + "/file/" + message.file.serverFileId;
-    link.setAttribute('target', '_blank');
-
-    messageDiv.append(peerName);
-    messageDiv.append(link);
-    messageDiv.append(fileInfoSize);
-
-    if (message.peerId == peerId) {
-        let fileInfoSent = document.createElement('p');
-        fileInfoSent.className = "file-info-served";
-        fileInfoSent.id = "file_served_" + message.file.serverFileId;
-        fileInfoSent.textContent = "Sent: " + humanFileSize(0);
-        fileInfoSent.setAttribute("amount-sent", "0");
-        messageDiv.append(fileInfoSent);
-    }
-
-    messageElem.append(messageDiv);
+    let messageElem;
 
     let messageField = document.getElementById('chat_history');
+    let lastChild = messageField.lastChild;
+    if(lastChild) {
+        let lastPeerId = lastChild.getAttribute('peerId');
+        if(lastPeerId && lastPeerId == message.peerId) {
+            messageElem = lastChild;
+        }
+    }
+    if(!messageElem) {
+        messageElem = document.createElement('div');
+        messageElem.className = "message-container";
+        messageElem.setAttribute('peerId', message.peerId);
+
+        let peerName = document.createElement('pre');
+        let ts = new Date(message.timestamp / 1000);
+        peerName.className = "message-author";
+        peerName.textContent = message.peerName + " at " + ts.toLocaleTimeString([], {timeStyle: 'short'});
+        messageElem.append(peerName);
+    }
+
+    let messageDivFiles = document.createElement('div');
+    messageDivFiles.className = "message-div-files";
+
+    for(i = 0; i < message.files.length; i ++) {
+
+        let file = message.files[i];
+
+        let fileInfoSize = document.createElement('p');
+        fileInfoSize.className = "file-info-size";
+        fileInfoSize.textContent = "Size: " + humanFileSize(file.size);
+
+        let link = document.createElement('a');
+        var linkText = document.createTextNode(file.name);
+        link.appendChild(linkText);
+        link.href = urlRoom + "/file/" + file.serverFileId;
+        link.setAttribute('target', '_blank');
+
+        let messageDivOneFile = document.createElement('div');
+        messageDivOneFile.className = "message-div-file";
+
+        messageDivOneFile.append(link);
+        messageDivOneFile.append(fileInfoSize);
+
+        if (message.peerId == peerId) {
+            let fileInfoSent = document.createElement('p');
+            fileInfoSent.className = "file-info-size";
+            fileInfoSent.id = "file_served_" + file.serverFileId;
+            fileInfoSent.textContent = "Sent: " + humanFileSize(0);
+            fileInfoSent.setAttribute("amount-sent", "0");
+            messageDivOneFile.append(fileInfoSent);
+        }
+
+        messageDivFiles.append(messageDivOneFile);
+
+    }
+
+    messageElem.append(messageDivFiles);
+
+    messageField = document.getElementById('chat_history');
     let scrollPos = messageField.scrollHeight - messageField.scrollTop;
 
     if(scrollPos <= messageField.getBoundingClientRect().height) {
@@ -176,12 +195,24 @@ function postSharedFile(message) {
 
 function postSystemMessage(message) {
 
-    let messageElem = document.createElement('div');
-    messageElem.className = "message-container";
+    let messageElem;
+
+    let messageField = document.getElementById('chat_history');
+    let lastChild = messageField.lastChild;
+    if(lastChild) {
+        let lastPeerId = lastChild.getAttribute('peerId');
+        if(lastPeerId && lastPeerId == 'sys') {
+            messageElem = lastChild;
+        }
+    }
+    if(!messageElem) {
+        messageElem = document.createElement('div');
+        messageElem.className = "message-container";
+        messageElem.setAttribute('peerId', 'sys');
+    }
 
     let messageDiv = document.createElement('div');
     messageDiv.className = "message-div-system";
-    messageDiv.style.backgroundColor = "#E0F7FA";
 
     let messageText = document.createElement('pre');
     messageText.className = "message-text";
@@ -190,7 +221,7 @@ function postSystemMessage(message) {
     messageDiv.append(messageText);
     messageElem.append(messageDiv);
 
-    let messageField = document.getElementById('chat_history');
+    messageField = document.getElementById('chat_history');
     let scrollPos = messageField.scrollHeight - messageField.scrollTop;
 
     if(scrollPos <= messageField.getBoundingClientRect().height) {
@@ -350,44 +381,50 @@ function updateParticipants() {
 
 }
 
-function sendFileChunk(chunkInfo) {
+function sendFileChunks(message) {
 
-    let file = filesMap.get(chunkInfo.clientFileId);
-    if(file) {
+    for(i = 0; i < message.files.length; i++) {
 
-        var posEnd = chunkInfo.chunkPosition + chunkInfo.chunkSize;
-        if(posEnd > file.size) {
-            posEnd = file.size;
-        }
+        let chunkInfo = message.files[i];
 
-        let chunk = file.slice(chunkInfo.chunkPosition, posEnd);
+        let file = filesMap.get(chunkInfo.clientFileId);
+        if (file) {
 
-        var reader = new FileReader();
-        reader.readAsBinaryString(chunk);
-        reader.onloadend = function() {
-
-            let data = btoa(reader.result);
-
-            let chunkData = {
-                serverFileId: chunkInfo.serverFileId,
-                subscriberId: chunkInfo.subscriberId,
-                data: data
+            var posEnd = chunkInfo.chunkPosition + chunkInfo.chunkSize;
+            if (posEnd > file.size) {
+                posEnd = file.size;
             }
 
-            let message = {
-                peerId: peerId,
-                code: 7,
-                file: chunkData
+            let chunk = file.slice(chunkInfo.chunkPosition, posEnd);
+
+            var reader = new FileReader();
+            reader.readAsBinaryString(chunk);
+            reader.onloadend = function () {
+
+                let data = btoa(reader.result);
+
+                let chunkData = {
+                    serverFileId: chunkInfo.serverFileId,
+                    subscriberId: chunkInfo.subscriberId,
+                    data: data
+                }
+
+                let message = {
+                    peerId: peerId,
+                    code: 7,
+                    files: [chunkData]
+                }
+
+                socketSendNextData(JSON.stringify(message));
+
+                let chunkSize = posEnd - chunkInfo.chunkPosition;
+                let sentLabel = document.getElementById("file_served_" + chunkInfo.serverFileId);
+                let sent = parseInt(sentLabel.getAttribute("amount-sent"));
+                let total = sent + chunkSize;
+                sentLabel.setAttribute("amount-sent", total.toString());
+                sentLabel.textContent = "Sent: " + humanFileSize(total);
+
             }
-
-            socketSendNextData(JSON.stringify(message));
-
-            let chunkSize = posEnd - chunkInfo.chunkPosition;
-            let sentLabel = document.getElementById("file_served_" + chunkInfo.serverFileId);
-            let sent = parseInt(sentLabel.getAttribute("amount-sent"));
-            let total = sent + chunkSize;
-            sentLabel.setAttribute("amount-sent", total.toString());
-            sentLabel.textContent = "Sent: " + humanFileSize(total);
 
         }
 
@@ -397,6 +434,8 @@ function sendFileChunk(chunkInfo) {
 
 function handleFiles(files) {
 
+    let filesJson = [];
+
     for(index = 0; index < files.length; index ++ ) {
 
         let file = files[index];
@@ -404,19 +443,18 @@ function handleFiles(files) {
 
         filesMap.set(fileId, file);
 
-        let message = {
-            code: 5,
-            file: {
-                name: file.name,
-                clientFileId: fileId,
-                size: file.size
-            }
-        }
-
-        socketSendNextData(JSON.stringify(message));
-        document.getElementById('file_share_button').value = "";
+        filesJson.push({
+            name: file.name,
+            clientFileId: fileId,
+            size: file.size
+        });
 
     }
+
+    let message = {code: 5, files: filesJson};
+    socketSendNextData(JSON.stringify(message));
+
+    document.getElementById('file_share_button').value = "";
 
 }
 
@@ -488,7 +526,7 @@ socket.onmessage = function(event) {
             break;
 
         case 6: // CODE_FILE_REQUEST_CHUNK
-            sendFileChunk(message.file);
+            sendFileChunks(message);
             break;
 
     }

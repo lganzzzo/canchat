@@ -59,6 +59,8 @@ void File::Subscriber::requestChunk(v_int64 size) {
     auto message = MessageDto::createShared();
     message->code = MessageCodes::CODE_FILE_REQUEST_CHUNK;
 
+    message->files = MessageDto::FilesList::createShared();
+
     auto file = FileDto::createShared();
     file->clientFileId = m_file->m_clientFileId;
     file->serverFileId = m_file->m_serverFileId;
@@ -67,7 +69,7 @@ void File::Subscriber::requestChunk(v_int64 size) {
     file->chunkPosition = m_progress;
     file->chunkSize = size;
 
-    message->file = file;
+    message->files->pushBack(file);
 
     m_file->m_host->sendMessage(message);
 

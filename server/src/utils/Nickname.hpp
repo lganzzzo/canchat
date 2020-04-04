@@ -35,6 +35,9 @@
 class Nickname {
 public:
 
+  static constexpr int AVATARS_SIZE = 35;
+  static const char* const AVATARS[];
+
   static constexpr int ADJECTIVES_SIZE = 103;
   static const char* const ADJECTIVES[];
 

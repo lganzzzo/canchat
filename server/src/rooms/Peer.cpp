@@ -58,6 +58,32 @@ void Peer::sendMessage(const MessageDto::ObjectWrapper& message) {
 
 }
 
+void Peer::validateFilesList(const MessageDto::FilesList::ObjectWrapper& filesList) {
+
+  auto curr = filesList->getFirstNode();
+
+  if(!curr)
+    throw std::runtime_error("Files list is empty.");
+
+  while(curr != nullptr) {
+
+    auto fileDto = curr->getData();
+
+    if (!fileDto)
+      throw std::runtime_error("File structure is not provided.");
+    if (!fileDto->clientFileId)
+      throw std::runtime_error("File clientId is not provided.");
+    if (!fileDto->name)
+      throw std::runtime_error("File name is not provided.");
+    if (!fileDto->size)
+      throw std::runtime_error("File size is not provided.");
+
+    curr = curr->getNext();
+
+  }
+
+}
+
 std::shared_ptr<Room> Peer::getRoom() {
   return m_room;
 }
@@ -117,31 +143,33 @@ oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebS
       case MessageCodes::CODE_PEER_MESSAGE_FILE: m_room->sendMessage(message); break;
       case MessageCodes::CODE_FILE_SHARE:
         {
-          auto fileDto = message->file;
-
-          if (!fileDto)
-            throw std::runtime_error("File structure is not provided.");
-          if (!fileDto->clientFileId)
-            throw std::runtime_error("File clientId is not provided.");
-          if (!fileDto->name)
-            throw std::runtime_error("File name is not provided.");
-          if (!fileDto->size)
-            throw std::runtime_error("File size is not provided.");
-
-          auto file = m_room->shareFile(m_userId, fileDto->clientFileId->getValue(), fileDto->name, fileDto->size->getValue());
+          auto files = message->files;
+          validateFilesList(files);
 
           auto fileMessage = MessageDto::createShared();
           fileMessage->code = MessageCodes::CODE_PEER_MESSAGE_FILE;
           fileMessage->peerId = m_userId;
           fileMessage->peerName = m_nickname;
           fileMessage->timestamp = oatpp::base::Environment::getMicroTickCount();
+          fileMessage->files = MessageDto::FilesList::createShared();
 
-          auto sharedFile = FileDto::createShared();
-          sharedFile->serverFileId = file->getServerFileId();
-          sharedFile->name = file->getFileName();
-          sharedFile->size = file->getFileSize();
+          auto curr = files->getFirstNode();
+          while(curr) {
 
-          fileMessage->file = sharedFile;
+            auto currFile = curr->getData();
+
+            auto file = m_room->shareFile(m_userId, currFile->clientFileId->getValue(), currFile->name, currFile->size->getValue());
+
+            auto sharedFile = FileDto::createShared();
+            sharedFile->serverFileId = file->getServerFileId();
+            sharedFile->name = file->getFileName();
+            sharedFile->size = file->getFileSize();
+
+            fileMessage->files->pushBack(sharedFile);
+
+            curr = curr->getNext();
+
+          }
 
           m_room->sendMessage(fileMessage);
 
@@ -150,7 +178,14 @@ oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebS
 
       case MessageCodes::CODE_FILE_CHUNK_DATA:
         {
-          auto fileDto = message->file;
+          auto filesList = message->files;
+          if(!filesList)
+            throw std::runtime_error("No file provided.");
+
+          if(filesList->count() > 1)
+            throw std::runtime_error("Invalid files count. Expected - 1.");
+
+          auto fileDto = filesList->getFirst();
           if (!fileDto)
             throw std::runtime_error("File structure is not provided.");
           if (!fileDto->serverFileId)

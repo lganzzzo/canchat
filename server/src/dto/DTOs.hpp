@@ -74,6 +74,8 @@ class FileDto : public oatpp::data::mapping::type::Object {
 
 class MessageDto : public oatpp::data::mapping::type::Object {
 public:
+  typedef List<FileDto::ObjectWrapper> FilesList;
+public:
 
   DTO_INIT(MessageDto, Object)
 
@@ -84,7 +86,7 @@ public:
   DTO_FIELD(Int64, timestamp);
   DTO_FIELD(List<PeerDto::ObjectWrapper>::ObjectWrapper, peers);
 
-  DTO_FIELD(FileDto::ObjectWrapper, file);
+  DTO_FIELD(List<FileDto::ObjectWrapper>::ObjectWrapper, files);
 
 };
 

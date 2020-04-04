@@ -27,6 +27,16 @@
 #include "Nickname.hpp"
 #include "oatpp/core/data/stream/BufferStream.hpp"
 
+const char* const Nickname::AVATARS[] = {
+  "⚽", "⛄", "⛱", "⛵", "⛺",
+  "🌀", "🌭", "🌲", "🌵", "🌶",
+  "🌺", "🌻", "🍀", "🍄", "🍕",
+  "🍭", "🎃", "🎾", "🐉", "🐌",
+  "🐛", "🐠", "🐿", "🔮", "🗿",
+  "🚌", "🤡", "🥐", "🦂", "🦄",
+  "🦅", "🦉", "🦋", "🦍", "🦑"
+};
+
 const char* const Nickname::ADJECTIVES[] = {
   "Attractive",
   "Bald",
@@ -191,11 +201,12 @@ thread_local std::mt19937 Nickname::RANDOM_GENERATOR(std::random_device{}());
 
 oatpp::String Nickname::random() {
 
-  std::uniform_int_distribution<size_t> distroA(0, ADJECTIVES_SIZE);
+  std::uniform_int_distribution<size_t> distroA(0, AVATARS_SIZE);
+  std::uniform_int_distribution<size_t> distroJ(0, ADJECTIVES_SIZE);
   std::uniform_int_distribution<size_t> distroN(0, NOUNS_SIZE);
 
   oatpp::data::stream::BufferOutputStream stream;
-  stream << ADJECTIVES[distroA(RANDOM_GENERATOR)] << " " << NOUNS[distroN(RANDOM_GENERATOR)];
+  stream << AVATARS[distroA(RANDOM_GENERATOR)] << " " << ADJECTIVES[distroJ(RANDOM_GENERATOR)] << " " << NOUNS[distroN(RANDOM_GENERATOR)];
 
   return stream.toString();
 

@@ -68,6 +68,10 @@ private:
   OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, m_asyncExecutor);
   OATPP_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>, m_objectMapper);
 
+private:
+
+  void validateFilesList(const MessageDto::FilesList::ObjectWrapper& filesList);
+
 public:
 
   Peer(const std::shared_ptr<AsyncWebSocket>& socket,
