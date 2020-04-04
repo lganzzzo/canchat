@@ -28,13 +28,20 @@
 #include "oatpp/core/data/stream/BufferStream.hpp"
 
 const char* const Nickname::AVATARS[] = {
-  "⚽", "⛄", "⛱", "⛵", "⛺",
+  "⚽", "⛄", "🏖", "⛵", "⛺",
   "🌀", "🌭", "🌲", "🌵", "🌶",
   "🌺", "🌻", "🍀", "🍄", "🍕",
   "🍭", "🎃", "🎾", "🐉", "🐌",
   "🐛", "🐠", "🐿", "🔮", "🗿",
   "🚌", "🤡", "🥐", "🦂", "🦄",
-  "🦅", "🦉", "🦋", "🦍", "🦑"
+  "🦅", "🦉", "🦋", "🦍", "🦑",
+  "🦁", "⛰", "⛲", "🌂", "🎷",
+  "🌋", "🌮", "🌴", "🍁", "🍆",
+  "🍔", "🍡", "🍰", "🎅", "🎈",
+  "🎭", "🎲", "🎸", "🎺", "🎻",
+  "🏀", "🏂", "🏈", "🏉", "🏓",
+  "🏹", "🏺", "🐈", "🐋", "🐚",
+  "🐝", "🐞", "🐡", "🐢", "🐫"
 };
 
 const char* const Nickname::ADJECTIVES[] = {
@@ -201,12 +208,16 @@ thread_local std::mt19937 Nickname::RANDOM_GENERATOR(std::random_device{}());
 
 oatpp::String Nickname::random() {
 
-  std::uniform_int_distribution<size_t> distroA(0, AVATARS_SIZE);
-  std::uniform_int_distribution<size_t> distroJ(0, ADJECTIVES_SIZE);
-  std::uniform_int_distribution<size_t> distroN(0, NOUNS_SIZE);
+  std::uniform_int_distribution<v_int32> distroA(0, AVATARS_SIZE - 1);
+  std::uniform_int_distribution<v_int32> distroJ(0, ADJECTIVES_SIZE - 1);
+  std::uniform_int_distribution<v_int32> distroN(0, NOUNS_SIZE - 1);
+
+  auto aIndex = distroA(RANDOM_GENERATOR);
+  auto jIndex = distroJ(RANDOM_GENERATOR);
+  auto nIndex = distroN(RANDOM_GENERATOR);
 
   oatpp::data::stream::BufferOutputStream stream;
-  stream << AVATARS[distroA(RANDOM_GENERATOR)] << " " << ADJECTIVES[distroJ(RANDOM_GENERATOR)] << " " << NOUNS[distroN(RANDOM_GENERATOR)];
+  stream << AVATARS[aIndex] << " " << ADJECTIVES[jIndex] << " " << NOUNS[nIndex];
 
   return stream.toString();
 

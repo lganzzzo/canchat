@@ -38,7 +38,7 @@ function insertAtCursor(myField, myValue) {
     }
 }
 
-function humanFileSize(bytes) {
+function humanFileSize(bytes, spin) {
     var thresh = 1024;
     if(Math.abs(bytes) < thresh) {
         return bytes + ' B';
@@ -49,7 +49,15 @@ function humanFileSize(bytes) {
         bytes /= thresh;
         ++u;
     } while(Math.abs(bytes) >= thresh && u < units.length - 1);
-    return bytes.toFixed(1) + ' ' + units[u];
+    let result = bytes.toFixed(1) + ' ' + units[u];
+    if(spin) {
+        let progress = ["|", "/", "-", "\\"];
+        let i1 = spin % progress.length;
+        let i2 = Math.trunc(spin / 10) % progress.length;
+        let i3 = Math.trunc(spin / 100) % progress.length;
+        result = result + " (" + progress[i3] + progress[i2] + progress[i1] + ")";
+    }
+    return result;
 }
 
 function setupEmoji (){
@@ -74,6 +82,8 @@ function postChatMessage(message) {
     let messageElem;
 
     let messageField = document.getElementById('chat_history');
+    let scrollPos = messageField.scrollHeight - messageField.scrollTop;
+
     let lastChild = messageField.lastChild;
     if(lastChild) {
         let lastPeerId = lastChild.getAttribute('peerId');
@@ -91,6 +101,7 @@ function postChatMessage(message) {
         peerName.className = "message-author";
         peerName.textContent = message.peerName + " at " + ts.toLocaleTimeString([], {timeStyle: 'short'});
         messageElem.append(peerName);
+        messageField.append(messageElem);
     }
 
     let messageDiv = document.createElement('div');
@@ -103,18 +114,12 @@ function postChatMessage(message) {
     messageText.className = "message-text";
     messageText.textContent = message.message;
 
-
     bulb.append(messageText);
     messageDiv.append(bulb);
     messageElem.append(messageDiv);
 
-    let scrollPos = messageField.scrollHeight - messageField.scrollTop;
-
     if(scrollPos <= messageField.getBoundingClientRect().height) {
-        messageField.append(messageElem);
         messageField.scrollTop = messageField.scrollHeight;
-    } else {
-        messageField.append(messageElem);
     }
 
 }
@@ -124,6 +129,7 @@ function postSharedFile(message) {
     let messageElem;
 
     let messageField = document.getElementById('chat_history');
+    let scrollPos = messageField.scrollHeight - messageField.scrollTop;
     let lastChild = messageField.lastChild;
     if(lastChild) {
         let lastPeerId = lastChild.getAttribute('peerId');
@@ -141,6 +147,7 @@ function postSharedFile(message) {
         peerName.className = "message-author";
         peerName.textContent = message.peerName + " at " + ts.toLocaleTimeString([], {timeStyle: 'short'});
         messageElem.append(peerName);
+        messageField.append(messageElem);
     }
 
     let messageDivFiles = document.createElement('div');
@@ -167,12 +174,14 @@ function postSharedFile(message) {
         messageDivOneFile.append(fileInfoSize);
 
         if (message.peerId == peerId) {
-            let fileInfoSent = document.createElement('p');
+            let fileInfoSent = document.createElement('pre');
             fileInfoSent.className = "file-info-size";
             fileInfoSent.id = "file_served_" + file.serverFileId;
-            fileInfoSent.textContent = "Sent: " + humanFileSize(0);
+            fileInfoSent.textContent = "Sent: " + humanFileSize(0, 0);
             fileInfoSent.setAttribute("amount-sent", "0");
+            fileInfoSent.setAttribute("progress-spin", "0");
             messageDivOneFile.append(fileInfoSent);
+
         }
 
         messageDivFiles.append(messageDivOneFile);
@@ -181,14 +190,8 @@ function postSharedFile(message) {
 
     messageElem.append(messageDivFiles);
 
-    messageField = document.getElementById('chat_history');
-    let scrollPos = messageField.scrollHeight - messageField.scrollTop;
-
     if(scrollPos <= messageField.getBoundingClientRect().height) {
-        messageField.append(messageElem);
         messageField.scrollTop = messageField.scrollHeight;
-    } else {
-        messageField.append(messageElem);
     }
 
 }
@@ -198,6 +201,7 @@ function postSystemMessage(message) {
     let messageElem;
 
     let messageField = document.getElementById('chat_history');
+    let scrollPos = messageField.scrollHeight - messageField.scrollTop;
     let lastChild = messageField.lastChild;
     if(lastChild) {
         let lastPeerId = lastChild.getAttribute('peerId');
@@ -209,6 +213,7 @@ function postSystemMessage(message) {
         messageElem = document.createElement('div');
         messageElem.className = "message-container";
         messageElem.setAttribute('peerId', 'sys');
+        messageField.append(messageElem);
     }
 
     let messageDiv = document.createElement('div');
@@ -221,14 +226,8 @@ function postSystemMessage(message) {
     messageDiv.append(messageText);
     messageElem.append(messageDiv);
 
-    messageField = document.getElementById('chat_history');
-    let scrollPos = messageField.scrollHeight - messageField.scrollTop;
-
     if(scrollPos <= messageField.getBoundingClientRect().height) {
-        messageField.append(messageElem);
         messageField.scrollTop = messageField.scrollHeight;
-    } else {
-        messageField.append(messageElem);
     }
 
 }
@@ -419,10 +418,11 @@ function sendFileChunks(message) {
 
                 let chunkSize = posEnd - chunkInfo.chunkPosition;
                 let sentLabel = document.getElementById("file_served_" + chunkInfo.serverFileId);
-                let sent = parseInt(sentLabel.getAttribute("amount-sent"));
-                let total = sent + chunkSize;
-                sentLabel.setAttribute("amount-sent", total.toString());
-                sentLabel.textContent = "Sent: " + humanFileSize(total);
+                let sent = parseInt(sentLabel.getAttribute("amount-sent")) + chunkSize;
+                let spin = parseInt(sentLabel.getAttribute("progress-spin")) + 1;
+                sentLabel.setAttribute("amount-sent", sent);
+                sentLabel.setAttribute("progress-spin", spin);
+                sentLabel.textContent = "Sent: " + humanFileSize(sent, spin);
 
             }
 
@@ -484,6 +484,14 @@ document.getElementById('chat_input').addEventListener("keypress", function (e) 
         e.preventDefault();
     }
 });
+
+socket.onclose = function(event) {
+    let status = document.getElementById('status_connection');
+    status.textContent = "offline";
+    status.className = "status_offline";
+    peersMap.clear();
+    updateParticipants();
+};
 
 // message received - show the message in div#messages
 socket.onmessage = function(event) {
