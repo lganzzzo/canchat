@@ -371,7 +371,7 @@
             opacity: 1;
         }
 
-        @media (max-device-width : 760px) and (orientation:portrait) {
+        @media (max-device-width : 560px) {
 
             #chat_status {
                 right: 0;
@@ -395,11 +395,7 @@
             }
 
             #chat_whos_typing {
-                position: absolute;
-                bottom: 160px;
-                left: 22px;
-                right: 276px;
-                overflow: hidden;
+                bottom: 258px;
             }
 
             #chat_participants {
@@ -441,8 +437,27 @@
                 font-size: 24px;
             }
 
+            form {
+                right: 150px;
+            }
+
+            #file_share_div {
+                width: 150px;
+                height: 150px;
+            }
+
             #file_share_button_overlay {
-                font-size: 18px;
+                position: absolute;
+                border: none;
+                outline: none;
+                padding: 15px 0;
+                display: inline-block;
+                cursor: pointer;
+                right: 0px;
+                height: 150px;
+                width: 148px;
+                margin: 2px;
+                font-size: 24px;
             }
 
             .typing_peer {
