@@ -69,7 +69,7 @@
             left:0;
             right: 254px;
             overflow: scroll;
-            padding: 0;
+            padding: 0 0 50px;
         }
 
         #chat_input_container {
@@ -79,6 +79,14 @@
             right: 274px;
             height: 140px;
             border-radius: 1px;
+        }
+
+        #chat_whos_typing {
+            position: absolute;
+            bottom: 160px;
+            left: 22px;
+            right: 276px;
+            overflow: scroll;
         }
 
         #chat_participants {
@@ -298,7 +306,7 @@
             position: absolute;
             border: none;
             outline: none;
-            padding: 15px 20px;
+            padding: 15px 0;
             display: inline-block;
             cursor: pointer;
             right: 0px;
@@ -324,6 +332,23 @@
             display: none;
         }
 
+        .typing_peer {
+            display: inline-block;
+            font-family: monospace;
+            font-size: 12px;
+            color: white;
+            padding: 2px 5px;
+            margin: 0 3px 3px 0;
+            background-color: rgba(255, 255, 255, 0.05);
+            transition: 0.25s;
+        }
+
+        .typing_peer_removed {
+            font-size: 0;
+            margin: 0;
+            padding: 0;
+        }
+
         #status_connection {
             position: absolute;
             left: 20px;
@@ -337,7 +362,7 @@
         .status_online {
             color: #00FF00;
             text-shadow: 0 0 2px #00FF00;
-            opacity: 0.7;
+            opacity: 0.5;
         }
 
         .status_offline {
@@ -358,6 +383,8 @@
         </div>
 
         <div id="chat_history"></div>
+
+        <div id="chat_whos_typing"></div>
 
         <div id="chat_participants"></div>
 

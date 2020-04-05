@@ -4,6 +4,19 @@
 // - urlRoom
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+let CODE_INFO = 0;
+let CODE_PEER_JOINED = 1;
+let CODE_PEER_LEFT = 2;
+let CODE_PEER_MESSAGE = 3;
+let CODE_PEER_MESSAGE_FILE = 4;
+let CODE_PEER_IS_TYPING = 5;
+
+let CODE_FILE_SHARE = 6;
+let CODE_FILE_REQUEST_CHUNK = 7;
+let CODE_FILE_CHUNK_DATA = 8;
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 let socket = new WebSocket(urlWebsocket);
 let peedId = null;
 let peerName = null;
@@ -12,6 +25,7 @@ let filesIdCounter = 1;
 let filesMap = new Map();
 let bulbColorsNumber = 18;
 let socketSendBuffer = [];
+let lastTimeTypingSent = 0;
 
 setupEmoji();
 
@@ -51,7 +65,7 @@ function humanFileSize(bytes, spin) {
     } while(Math.abs(bytes) >= thresh && u < units.length - 1);
     let result = bytes.toFixed(1) + ' ' + units[u];
     if(spin) {
-        let progress = ["|", "/", "-", "\\"];
+        let progress = ["↑", "↗", "→", "↘", "↓", "↙", "←", "↖"];
         let i1 = spin % progress.length;
         let i2 = Math.trunc(spin / 10) % progress.length;
         let i3 = Math.trunc(spin / 100) % progress.length;
@@ -78,6 +92,8 @@ function setupEmoji (){
 }
 
 function postChatMessage(message) {
+
+    removeTypingPeerNow(message.peerId);
 
     let messageElem;
 
@@ -198,6 +214,8 @@ function postSharedFile(message) {
 
 function postSystemMessage(message) {
 
+    removeTypingPeerNow(message.peerId);
+
     let messageElem;
 
     let messageField = document.getElementById('chat_history');
@@ -221,7 +239,7 @@ function postSystemMessage(message) {
 
     let messageText = document.createElement('pre');
     messageText.className = "message-text";
-    messageText.textContent = "📢" + message.message;
+    messageText.textContent = "📢 " + message.message;
 
     messageDiv.append(messageText);
     messageElem.append(messageDiv);
@@ -231,6 +249,79 @@ function postSystemMessage(message) {
     }
 
 }
+
+function postPeerIsTyping(message) {
+
+    if(message.peerId == peerId) {
+        return;
+    }
+
+    let typingPeerElem = document.getElementById('typing_peer_' + message.peerId);
+    if(typingPeerElem && typingPeerElem.classList.contains("typing_peer_removed")) {
+        typingPeerElem.remove();
+        typingPeerElem = null;
+    }
+    if(!typingPeerElem) {
+        let whosTypingPanel = document.getElementById('chat_whos_typing');
+        typingPeerElem = document.createElement('pre');
+        typingPeerElem.id = 'typing_peer_' + message.peerId;
+        typingPeerElem.className = "typing_peer";
+        typingPeerElem.textContent = message.peerName + "   ";
+        whosTypingPanel.append(typingPeerElem);
+    }
+
+    let ts = new Date();
+    typingPeerElem.setAttribute("typing_timestamp", ts.getTime());
+
+}
+
+function removeTypingPeerNow(typingPeerId) {
+    let typingPeerElem = document.getElementById('typing_peer_' + typingPeerId);
+    if(typingPeerElem) {
+        typingPeerElem.remove();
+    }
+}
+
+function removeTypingPeer(peerElem) {
+    let transitionCounter = 0;
+    peerElem.classList.add("typing_peer_removed");
+    peerElem.addEventListener('transitionstart', function() {
+        transitionCounter ++;
+    });
+    peerElem.addEventListener('transitionend', function() {
+        transitionCounter --;
+        if(transitionCounter == 0) {
+            peerElem.remove();
+        }
+    });
+}
+
+let animateWhosTyping = setInterval(function() {
+
+    let whosTypingPanel = document.getElementById('chat_whos_typing');
+    let peers = whosTypingPanel.children;
+    let now = (new Date()).getTime();
+
+    for(i = 0; i < peers.length; i++) {
+        let peer = peers[i];
+        let timestamp = parseInt(peer.getAttribute("typing_timestamp"));
+        if(timestamp + 5000 < now) {
+            removeTypingPeer(peer);
+        } else {
+            let text = peer.textContent;
+            if(text.endsWith("...")) {
+                peer.textContent = text.replace("...", "   ");
+            } else if(text.endsWith("   ")) {
+                peer.textContent = text.replace("   ", ".  ");
+            } else if(text.endsWith(".  ")) {
+                peer.textContent = text.replace(".  ", ".. ");
+            } else if(text.endsWith(".. ")) {
+                peer.textContent = text.replace(".. ", "...");
+            }
+        }
+    }
+
+}, 500);
 
 function createParticipantElement(peer) {
     let peerElem = document.createElement('div');
@@ -410,7 +501,7 @@ function sendFileChunks(message) {
 
                 let message = {
                     peerId: peerId,
-                    code: 7,
+                    code: CODE_FILE_CHUNK_DATA,
                     files: [chunkData]
                 }
 
@@ -451,7 +542,7 @@ function handleFiles(files) {
 
     }
 
-    let message = {code: 5, files: filesJson};
+    let message = {code: CODE_FILE_SHARE, files: filesJson};
     socketSendNextData(JSON.stringify(message));
 
     document.getElementById('file_share_button').value = "";
@@ -468,7 +559,7 @@ document.forms.publish.onsubmit = function() {
         let message = {
             peerId: peerId,
             peerName: peerName,
-            code: 3,
+            code: CODE_PEER_MESSAGE,
             message: outgoingMessage
         }
         socketSendNextData(JSON.stringify(message));
@@ -482,6 +573,17 @@ document.getElementById('chat_input').addEventListener("keypress", function (e) 
     if(e.which == 13 && !e.shiftKey) {
         document.forms.publish.onsubmit();
         e.preventDefault();
+    } else {
+
+        let now = (new Date()).getTime();
+
+        if(now > lastTimeTypingSent + 1000) {
+            let message = {
+                code: CODE_PEER_IS_TYPING,
+            }
+            socketSendNextData(JSON.stringify(message));
+            lastTimeTypingSent = now;
+        }
     }
 });
 
@@ -500,7 +602,7 @@ socket.onmessage = function(event) {
 
     switch(message.code) {
 
-        case 0: // initial info
+        case CODE_INFO:
             peerId = message.peerId;
             peerName = message.peerName;
 
@@ -512,7 +614,7 @@ socket.onmessage = function(event) {
             updateParticipants();
             break;
 
-        case 1: // joined
+        case CODE_PEER_JOINED:
             postSystemMessage(message);
             peer = new Object();
             peer.peerId = message.peerId;
@@ -520,20 +622,26 @@ socket.onmessage = function(event) {
             peersMap.set(peer.peerId, peer);
             updateParticipants();
             break;
-        case 2: // left
+
+        case CODE_PEER_LEFT:
             postSystemMessage(message);
             peersMap.delete(message.peerId);
             updateParticipants();
             break;
-        case 3: // message
+
+        case CODE_PEER_MESSAGE:
             postChatMessage(message);
             break;
 
-        case 4: // file
+        case CODE_PEER_IS_TYPING:
+            postPeerIsTyping(message)
+            break;
+
+        case CODE_PEER_MESSAGE_FILE:
             postSharedFile(message);
             break;
 
-        case 6: // CODE_FILE_REQUEST_CHUNK
+        case CODE_FILE_REQUEST_CHUNK:
             sendFileChunks(message);
             break;
 

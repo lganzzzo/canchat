@@ -129,6 +129,7 @@ oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebS
 
     auto message = m_objectMapper->readFromString<MessageDto>(wholeMessage);
     message->peerName = m_nickname;
+    message->peerId = m_userId;
     message->timestamp = oatpp::base::Environment::getMicroTickCount();
 
     if(!message->code) {
@@ -141,6 +142,7 @@ oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebS
       case MessageCodes::CODE_PEER_LEFT: m_room->sendMessage(message); break;
       case MessageCodes::CODE_PEER_MESSAGE: m_room->sendMessage(message); break;
       case MessageCodes::CODE_PEER_MESSAGE_FILE: m_room->sendMessage(message); break;
+      case MessageCodes::CODE_PEER_IS_TYPING: m_room->sendMessage(message); break;
       case MessageCodes::CODE_FILE_SHARE:
         {
           auto files = message->files;
