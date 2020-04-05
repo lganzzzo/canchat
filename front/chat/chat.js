@@ -573,18 +573,21 @@ document.getElementById('chat_input').addEventListener("keypress", function (e) 
     if(e.which == 13 && !e.shiftKey) {
         document.forms.publish.onsubmit();
         e.preventDefault();
-    } else {
-
-        let now = (new Date()).getTime();
-
-        if(now > lastTimeTypingSent + 1000) {
-            let message = {
-                code: CODE_PEER_IS_TYPING,
-            }
-            socketSendNextData(JSON.stringify(message));
-            lastTimeTypingSent = now;
-        }
     }
+});
+
+document.getElementById('chat_input').addEventListener("input", function () {
+
+    let now = (new Date()).getTime();
+
+    if(now > lastTimeTypingSent + 1000) {
+        let message = {
+            code: CODE_PEER_IS_TYPING,
+        }
+        socketSendNextData(JSON.stringify(message));
+        lastTimeTypingSent = now;
+    }
+
 });
 
 socket.onclose = function(event) {
