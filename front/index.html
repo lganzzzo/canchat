@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <title>Can-Chat</title>
     <style>
+
         body {
             text-align: center;
             font-family: Arial, Helvetica, sans-serif;
@@ -11,7 +12,7 @@
 
         #container {
             display: inline-block;
-            max-width: 800px;
+            max-width: 600px;
         }
 
         #note {
@@ -26,11 +27,24 @@
         #starter {
             display: inline-grid;
             text-align: center;
-            margin: 0 0 30px 0
+            margin: 0 0 50px 0
         }
 
-        #starter h2{
-            margin-bottom: 35px;
+        h1 {
+            font-size: 4rem;
+        }
+
+        .welcome {
+            padding: 0 0 20px 0;
+            font-size: 1.5rem;
+        }
+
+        h2{
+            margin: 40px 0 40px 0;
+        }
+
+        h3 {
+            font-size: medium;
         }
 
         input {
@@ -40,18 +54,28 @@
             padding: 9px 20px;
             cursor: pointer;
             margin: 0 0 10px 0;
-            font-size: 2vh;
+            font-size: 16px;
             border-radius: 3px;
             background-color: #448AFF;
             color: white;
         }
 
         input:hover {
-            background-color: #00FF00;
+            background-color: #2979FF;
         }
 
         input:active {
-            background-color: #0000FF;
+            background-color: #2979FF;
+        }
+
+        .info {
+            font-size: 0.85rem;
+            padding-bottom: 50px;
+        }
+
+        .iframe {
+            display: inline-block;
+            max-width: 130px;
         }
 
     </style>
@@ -62,20 +86,29 @@
 
         <h1>Can-Chat</h1>
 
-        <p style="padding-top: 20px;">
-            Welcome to Can-Chat - Anonymous, secure chat!
+        <p class="welcome">
+            Welcome to Can-Chat - Anonymous, secret chat!
         </p>
+
+        <div>
+            <div class="iframe">
+                <iframe src="https://ghbtns.com/github-btn.html?user=lganzzzo&repo=canchat&type=star&count=true&size=large" frameborder="0" scrolling="0" height="30px"></iframe>
+            </div>
+            <div class="iframe">
+                <iframe src="https://ghbtns.com/github-btn.html?user=lganzzzo&repo=canchat&type=fork&count=true&size=large" frameborder="0" scrolling="0" height="30px"></iframe>
+            </div>
+        </div>
 
         <h2>Join Room</h2>
 
         <div id="starter">
 
-            <input type="button" value="Public Lobby" onclick="startLobby();">
-            <input type="button" value="New Private Room" onclick="startPrivateRoom();">
+            <input type="button" value="Join Public Lobby" onclick="startLobby();">
+            <input type="button" value="Create New Private Room" onclick="startPrivateRoom();">
 
         </div>
 
-        <p>
+        <p class="info">
             <i>If you are the first time here, please read the short info below.</i>
         </p>
 
