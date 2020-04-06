@@ -164,10 +164,6 @@
             padding: 3px 20px 3px 21px;
         }
 
-        .message-bulb:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-
         .message-div-system {
             padding: 3px 20px 3px 21px;
             margin: 0;
@@ -332,6 +328,10 @@
             display: none;
         }
 
+        #send_button {
+            display: none;
+        }
+
         .typing_peer {
             display: inline-block;
             font-family: monospace;
@@ -446,14 +446,42 @@
             }
 
             #file_share_div {
+                top: 192px;
                 width: 150px;
-                height: 150px;
+                height: 86px;
             }
 
             #file_share_button_overlay {
-                height: 150px;
+                height: 86px;
                 width: 148px;
                 font-size: 24px;
+            }
+
+            #send_button {
+                display: block;
+                position: absolute;
+                border: none;
+                outline: none;
+                padding: 15px 0;
+                cursor: pointer;
+                right: 0px;
+                width: 148px;
+                height: 150px;
+                top: 40px;
+                margin: 2px;
+                font-size: 24px;
+                border-radius: 1px;
+                background-color: rgba(255, 255, 255, 0.1);
+                color: rgba(255, 255, 255, 0.7);
+            }
+
+            #send_button:hover {
+                color: rgba(255, 255, 255, 1);
+            }
+
+            #send_button:active {
+                color: rgba(255, 255, 255, 1);
+                background-color: rgba(255, 255, 255, 0.2);
             }
 
             .typing_peer {
@@ -511,6 +539,7 @@
                 <input id="file_share_button_overlay" type="submit" value="Share Files" onclick="document.getElementById('file_share_button').click();">
                 <input id="file_share_button" type="file" multiple onchange="handleFiles(this.files)" value="Share Files">
             </div>
+            <input id="send_button" type="submit" value="Send" onclick="document.forms.publish.onsubmit();">
             <form name="publish" autocomplete="off">
                 <div id="ta-container">
                     <div id="ta-div">
