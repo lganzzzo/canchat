@@ -655,3 +655,10 @@ socket.onmessage = function(event) {
 function socketSendNextData(data) {
     socket.send(data);
 }
+
+window.addEventListener("beforeunload", function (e) {
+    event.preventDefault();
+    event.returnValue = "You are about to leave the chat. " +
+        "Once you leave you'll lose chat history and all of your files shared will be canceled. " +
+        "Are you sure you want to leave the chat?";
+});
