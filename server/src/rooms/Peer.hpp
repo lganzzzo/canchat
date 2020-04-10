@@ -32,11 +32,11 @@
 
 #include "oatpp-websocket/AsyncWebSocket.hpp"
 
+#include "oatpp/network/ConnectionProvider.hpp"
+
 #include "oatpp/core/async/Lock.hpp"
 #include "oatpp/core/async/Executor.hpp"
-
 #include "oatpp/core/data/mapping/ObjectMapper.hpp"
-
 #include "oatpp/core/macro/component.hpp"
 
 class Room; // FWD
@@ -59,6 +59,8 @@ private:
   std::shared_ptr<Room> m_room;
   oatpp::String m_nickname;
   v_int64 m_userId;
+private:
+  std::atomic<v_int32> m_pingPoingCounter;
   std::list<std::shared_ptr<File>> m_files;
 private:
 
@@ -67,6 +69,7 @@ private:
    */
   OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, m_asyncExecutor);
   OATPP_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>, m_objectMapper);
+  OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, serverConnectionProvider);
 
 private:
 
@@ -82,13 +85,21 @@ public:
     , m_room(room)
     , m_nickname(nickname)
     , m_userId(userId)
+    , m_pingPoingCounter(0)
   {}
 
   /**
    * Send message to peer (to user).
    * @param message
    */
-  void sendMessage(const MessageDto::ObjectWrapper& message);
+  void sendMessageAsync(const MessageDto::ObjectWrapper& message);
+
+  /**
+   * Send Websocket-Ping.
+   * @return - `true` - ping was sent.
+   * `false` peer has not responded to the last ping, it means we have to disconnect him.
+   */
+  bool sendPingAsync();
 
   /**
    * Get room of the peer.

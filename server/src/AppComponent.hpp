@@ -63,7 +63,7 @@ public:
 
     auto config = ConfigDto::createShared();
 
-    config->host = m_cmdArgs.getNamedArgumentValue("--host", "localhost");
+    config->host = m_cmdArgs.getNamedArgumentValue("--host", "176.37.47.230");
     auto portText = m_cmdArgs.getNamedArgumentValue("--port", "8443");
 
     bool success;
@@ -134,7 +134,9 @@ public:
    *  Create ObjectMapper component to serialize/deserialize DTOs in Contoller's API
    */
   OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>, apiObjectMapper)([] {
-    return oatpp::parser::json::mapping::ObjectMapper::createShared();
+    auto mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
+    mapper->getSerializer()->getConfig()->includeNullFields = false;
+    return mapper;
   }());
 
   /**

@@ -27,9 +27,10 @@
 #include "Peer.hpp"
 #include "Room.hpp"
 
+#include "oatpp/network/Connection.hpp"
 #include "oatpp/encoding/Base64.hpp"
 
-void Peer::sendMessage(const MessageDto::ObjectWrapper& message) {
+void Peer::sendMessageAsync(const MessageDto::ObjectWrapper& message) {
 
   class SendMessageCoroutine : public oatpp::async::Coroutine<SendMessageCoroutine> {
   private:
@@ -55,6 +56,37 @@ void Peer::sendMessage(const MessageDto::ObjectWrapper& message) {
   if(m_socket) {
     m_asyncExecutor->execute<SendMessageCoroutine>(&m_writeLock, m_socket, m_objectMapper->writeToString(message));
   }
+
+}
+
+bool Peer::sendPingAsync() {
+
+  class SendPingCoroutine : public oatpp::async::Coroutine<SendPingCoroutine> {
+  private:
+    oatpp::async::Lock* m_lock;
+    std::shared_ptr<AsyncWebSocket> m_websocket;
+  public:
+
+    SendPingCoroutine(oatpp::async::Lock* lock,
+                      const std::shared_ptr<AsyncWebSocket>& websocket)
+      : m_lock(lock)
+      , m_websocket(websocket)
+    {}
+
+    Action act() override {
+      return oatpp::async::synchronize(m_lock, m_websocket->sendPingAsync(nullptr)).next(finish());
+    }
+
+  };
+
+  ++ m_pingPoingCounter;
+
+  if(m_socket && m_pingPoingCounter == 1) {
+    m_asyncExecutor->execute<SendPingCoroutine>(&m_writeLock, m_socket);
+    return true;
+  }
+
+  return false;
 
 }
 
@@ -105,6 +137,9 @@ const std::list<std::shared_ptr<File>>& Peer::getFiles() {
 }
 
 void Peer::invalidateSocket() {
+  if(m_socket) {
+    serverConnectionProvider->invalidateConnection(m_socket->getConnection());
+  }
   m_socket.reset();
 }
 
@@ -113,6 +148,7 @@ oatpp::async::CoroutineStarter Peer::onPing(const std::shared_ptr<AsyncWebSocket
 }
 
 oatpp::async::CoroutineStarter Peer::onPong(const std::shared_ptr<AsyncWebSocket>& socket, const oatpp::String& message) {
+  -- m_pingPoingCounter;
   return nullptr; // do nothing
 }
 
@@ -138,11 +174,16 @@ oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebS
 
     switch(message->code->getValue()) {
 
-      case MessageCodes::CODE_PEER_JOINED: m_room->sendMessage(message); break;
-      case MessageCodes::CODE_PEER_LEFT: m_room->sendMessage(message); break;
-      case MessageCodes::CODE_PEER_MESSAGE: m_room->sendMessage(message); break;
-      case MessageCodes::CODE_PEER_MESSAGE_FILE: m_room->sendMessage(message); break;
-      case MessageCodes::CODE_PEER_IS_TYPING: m_room->sendMessage(message); break;
+      case MessageCodes::CODE_PEER_JOINED:
+        m_room->sendMessageAsync(message); break;
+      case MessageCodes::CODE_PEER_LEFT:
+        m_room->sendMessageAsync(message); break;
+      case MessageCodes::CODE_PEER_MESSAGE:
+        m_room->sendMessageAsync(message); break;
+      case MessageCodes::CODE_PEER_MESSAGE_FILE:
+        m_room->sendMessageAsync(message); break;
+      case MessageCodes::CODE_PEER_IS_TYPING:
+        m_room->sendMessageAsync(message); break;
       case MessageCodes::CODE_FILE_SHARE:
         {
           auto files = message->files;
@@ -173,7 +214,7 @@ oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebS
 
           }
 
-          m_room->sendMessage(fileMessage);
+          m_room->sendMessageAsync(fileMessage);
 
         }
         break;

@@ -71,7 +71,7 @@ void File::Subscriber::requestChunk(v_int64 size) {
 
     message->files->pushBack(file);
 
-    m_file->m_host->sendMessage(message);
+    m_file->m_host->sendMessageAsync(message);
 
   }
 

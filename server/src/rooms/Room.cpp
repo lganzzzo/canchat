@@ -50,7 +50,7 @@ void Room::welcomePeer(const std::shared_ptr<Peer>& peer) {
     }
   }
 
-  peer->sendMessage(infoMessage);
+  peer->sendMessageAsync(infoMessage);
 
   auto joinedMessage = MessageDto::createShared();
   joinedMessage->code = MessageCodes::CODE_PEER_JOINED;
@@ -58,7 +58,7 @@ void Room::welcomePeer(const std::shared_ptr<Peer>& peer) {
   joinedMessage->peerName = peer->getNickname();
   joinedMessage->message = peer->getNickname() + " - joined room";
 
-  sendMessage(joinedMessage);
+  sendMessageAsync(joinedMessage);
 
 }
 
@@ -69,7 +69,7 @@ void Room::goodbyePeer(const std::shared_ptr<Peer>& peer) {
   message->peerId = peer->getUserId();
   message->message = peer->getNickname() + " - left room";
 
-  sendMessage(message);
+  sendMessageAsync(message);
 
 }
 
@@ -131,9 +131,20 @@ std::shared_ptr<File> Room::getFileById(v_int64 fileId) {
   return nullptr;
 }
 
-void Room::sendMessage(const MessageDto::ObjectWrapper& message) {
+void Room::sendMessageAsync(const MessageDto::ObjectWrapper& message) {
   std::lock_guard<std::mutex> guard(m_peerByIdLock);
   for(auto& pair : m_peerById) {
-    pair.second->sendMessage(message);
+    pair.second->sendMessageAsync(message);
+  }
+}
+
+void Room::pingAllPeers() {
+  std::lock_guard<std::mutex> guard(m_peerByIdLock);
+  for(auto& pair : m_peerById) {
+    auto& peer = pair.second;
+    if(!peer->sendPingAsync()) {
+      peer->invalidateSocket();
+      break;
+    }
   }
 }

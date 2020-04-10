@@ -65,6 +65,12 @@ public:
    */
   std::shared_ptr<Room> getRoom(const oatpp::String& roomName);
 
+  /**
+   * Websocket-Ping all peers in the loop. Each time `interval`.
+   * @param interval
+   */
+  void runPingLoop(const std::chrono::duration<v_int64, std::micro>& interval = std::chrono::minutes(1));
+
 public:
 
   /**

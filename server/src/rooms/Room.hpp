@@ -100,7 +100,12 @@ public:
    * Send message to all peers in the room.
    * @param message
    */
-  void sendMessage(const MessageDto::ObjectWrapper& message);
+  void sendMessageAsync(const MessageDto::ObjectWrapper& message);
+
+  /**
+   * Websocket-Ping all peers.
+   */
+  void pingAllPeers();
 
 };
 

@@ -64,8 +64,16 @@ void run(const oatpp::base::CommandLineArguments& args) {
   /* Priny info about server port */
   OATPP_LOGI("MyApp", "Server running on port %s", connectionProvider->getProperty("port").getData());
 
-  /* Run server */
-  server.run();
+  std::thread serverThread([&server]{
+    server.run();
+  });
+
+  std::thread pingThread([]{
+    OATPP_COMPONENT(std::shared_ptr<Lobby>, lobby);
+    lobby->runPingLoop(std::chrono::seconds(20));
+  });
+
+  serverThread.join();
 
 }
 

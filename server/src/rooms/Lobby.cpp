@@ -48,6 +48,27 @@ std::shared_ptr<Room> Lobby::getRoom(const oatpp::String& roomName) {
   return nullptr;
 }
 
+void Lobby::runPingLoop(const std::chrono::duration<v_int64, std::micro>& interval) {
+
+  while(true) {
+
+    std::chrono::duration<v_int64, std::micro> elapsed = std::chrono::microseconds(0);
+    auto startTime = std::chrono::system_clock::now();
+
+    do {
+      std::this_thread::sleep_for(interval - elapsed);
+      elapsed = std::chrono::system_clock::now() - startTime;
+    } while (elapsed < interval);
+
+    std::lock_guard<std::mutex> lock(m_roomsMutex);
+    for (const auto &room : m_rooms) {
+      room.second->pingAllPeers();
+    }
+
+  }
+
+}
+
 void Lobby::onAfterCreate_NonBlocking(const std::shared_ptr<AsyncWebSocket>& socket, const std::shared_ptr<const ParameterMap>& params) {
 
   auto roomName = params->find("roomName")->second;
@@ -65,13 +86,10 @@ void Lobby::onAfterCreate_NonBlocking(const std::shared_ptr<AsyncWebSocket>& soc
 void Lobby::onBeforeDestroy_NonBlocking(const std::shared_ptr<AsyncWebSocket>& socket) {
 
   auto peer = std::static_pointer_cast<Peer>(socket->getListener());
-  auto nickname = peer->getNickname();
   auto room = peer->getRoom();
 
   room->removePeerByUserId(peer->getUserId());
-
   room->goodbyePeer(peer);
-
   peer->invalidateSocket();
 
 }
