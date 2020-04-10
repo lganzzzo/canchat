@@ -58,6 +58,7 @@
             border-radius: 3px;
             background-color: #448AFF;
             color: white;
+            text-transform: uppercase;
         }
 
         input:hover {
@@ -78,11 +79,18 @@
             max-width: 130px;
         }
 
-        iframe {
-            height: 30px;
-        }
-
         @media (max-device-width : 560px) {
+
+            .iframe {
+                max-width: 200px;
+                -ms-zoom: 1.5;
+                -moz-transform: scale(1.5);
+                -moz-transform-origin: 0 0;
+                -o-transform: scale(1.5);
+                -o-transform-origin: 0 0;
+                -webkit-transform: scale(1.5);
+                -webkit-transform-origin: 0 0;
+            }
 
             h1 {
                 font-size: 7rem;
@@ -94,8 +102,8 @@
             }
 
             h2{
-                margin: 40px 0 40px 0;
-                font-size: 3.5rem;
+                margin: 40px 0 60px 0;
+                font-size: 3.8rem;
             }
 
             h3 {
@@ -104,6 +112,8 @@
 
             input {
                 font-size: 36px;
+                padding: 14px 20px;
+                margin: 0 0 20px 0;
             }
 
             #container {
@@ -138,8 +148,8 @@
 
         <div id="starter">
 
-            <input type="button" value="Join Public Lobby" onclick="startLobby();">
-            <input type="button" value="Create New Private Room" onclick="startPrivateRoom();">
+            <input type="button" value="Public Lobby" onclick="startLobby();">
+            <input type="button" value="New Private Room" onclick="startPrivateRoom();">
 
         </div>
 

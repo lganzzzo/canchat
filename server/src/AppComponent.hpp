@@ -63,7 +63,7 @@ public:
 
     auto config = ConfigDto::createShared();
 
-    config->host = m_cmdArgs.getNamedArgumentValue("--host", "176.37.47.230");
+    config->host = m_cmdArgs.getNamedArgumentValue("--host", "localhost");
     auto portText = m_cmdArgs.getNamedArgumentValue("--port", "8443");
 
     bool success;

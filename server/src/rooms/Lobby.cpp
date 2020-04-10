@@ -57,7 +57,7 @@ void Lobby::runPingLoop(const std::chrono::duration<v_int64, std::micro>& interv
 
     do {
       std::this_thread::sleep_for(interval - elapsed);
-      elapsed = std::chrono::system_clock::now() - startTime;
+      elapsed = std::chrono::duration_cast<std::chrono::microseconds>(std::chrono::system_clock::now() - startTime);
     } while (elapsed < interval);
 
     std::lock_guard<std::mutex> lock(m_roomsMutex);
