@@ -56,8 +56,8 @@ target_link_libraries(${project_name}-lib
 ## define certificates path
 
 add_definitions(
-        -DCERT_PEM_PATH="${CMAKE_CURRENT_LIST_DIR}/cert/test_key.pem"
-        -DCERT_CRT_PATH="${CMAKE_CURRENT_LIST_DIR}/cert/test_cert.crt"
+        -DCERT_PEM_PATH="${CMAKE_CURRENT_LIST_DIR}/../cert/test_key.pem"
+        -DCERT_CRT_PATH="${CMAKE_CURRENT_LIST_DIR}/../cert/test_cert.crt"
         -DFRONT_PATH="${CMAKE_CURRENT_LIST_DIR}/../front"
 )
 

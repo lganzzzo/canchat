@@ -49,6 +49,11 @@ public:
    */
   DTO_FIELD(UInt64, maxMessageSizeBytes) = 8 * 1024; // Default - 8Kb
 
+  /**
+   * Number of the most recent messages to keep in the room history.
+   */
+  DTO_FIELD(UInt32, maxRoomHistoryMessages) = 100;
+
 public:
 
   oatpp::String getWebsocketBaseUrl() {

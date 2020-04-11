@@ -48,6 +48,11 @@ std::shared_ptr<Room> Lobby::getRoom(const oatpp::String& roomName) {
   return nullptr;
 }
 
+void Lobby::deleteRoom(const oatpp::String& roomName) {
+  std::lock_guard<std::mutex> lock(m_roomsMutex);
+  m_rooms.erase(roomName);
+}
+
 void Lobby::runPingLoop(const std::chrono::duration<v_int64, std::micro>& interval) {
 
   while(true) {
@@ -78,8 +83,9 @@ void Lobby::onAfterCreate_NonBlocking(const std::shared_ptr<AsyncWebSocket>& soc
   auto peer = std::make_shared<Peer>(socket, room, nickname, obtainNewPeerId());
   socket->setListener(peer);
 
-  room->addPeer(peer);
   room->welcomePeer(peer);
+  room->addPeer(peer);
+  room->onboardPeer(peer);
 
 }
 
@@ -91,5 +97,9 @@ void Lobby::onBeforeDestroy_NonBlocking(const std::shared_ptr<AsyncWebSocket>& s
   room->removePeerById(peer->getPeerId());
   room->goodbyePeer(peer);
   peer->invalidateSocket();
+
+  if(room->isEmpty()) {
+    deleteRoom(room->getName());
+  }
 
 }

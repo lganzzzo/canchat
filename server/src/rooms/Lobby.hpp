@@ -66,6 +66,12 @@ public:
   std::shared_ptr<Room> getRoom(const oatpp::String& roomName);
 
   /**
+   * Delete room by name.
+   * @param roomName
+   */
+  void deleteRoom(const oatpp::String& roomName);
+
+  /**
    * Websocket-Ping all peers in the loop. Each time `interval`.
    * @param interval
    */

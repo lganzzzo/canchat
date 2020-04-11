@@ -87,7 +87,9 @@ public:
   DTO_FIELD(Int32, code);
   DTO_FIELD(String, message);
   DTO_FIELD(Int64, timestamp);
+
   DTO_FIELD(List<PeerDto::ObjectWrapper>::ObjectWrapper, peers);
+  DTO_FIELD(List<MessageDto::ObjectWrapper>::ObjectWrapper, history);
 
   DTO_FIELD(List<FileDto::ObjectWrapper>::ObjectWrapper, files);
 

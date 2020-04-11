@@ -79,7 +79,7 @@ function setupEmoji (){
     let div = document.getElementById('emoji');
     let children = div.children;
 
-    for (index = 0; index < children.length; index ++) {
+    for (let index = 0; index < children.length; index ++) {
 
         let child = children[index];
         child.addEventListener('click', function() {
@@ -169,7 +169,7 @@ function postSharedFile(message) {
     let messageDivFiles = document.createElement('div');
     messageDivFiles.className = "message-div-files";
 
-    for(i = 0; i < message.files.length; i ++) {
+    for(let i = 0; i < message.files.length; i ++) {
 
         let file = message.files[i];
 
@@ -302,7 +302,7 @@ let animateWhosTyping = setInterval(function() {
     let peers = whosTypingPanel.children;
     let now = (new Date()).getTime();
 
-    for(i = 0; i < peers.length; i++) {
+    for(let i = 0; i < peers.length; i++) {
         let peer = peers[i];
         let timestamp = parseInt(peer.getAttribute("typing_timestamp"));
         if(timestamp + 5000 < now) {
@@ -387,7 +387,7 @@ function createParticipantsList() {
     let peers = Array.from(peersMap.values());
     peers.sort(cmpPeers);
 
-    for (index = 0; index < peers.length; index++) {
+    for (let index = 0; index < peers.length; index++) {
 
         let peer = peers[index];
 
@@ -417,7 +417,7 @@ function updateParticipants() {
         let childrenLeft = [];
         let childrenNew = [];
 
-        for (index = 0; index < children.length; index ++) {
+        for (let index = 0; index < children.length; index ++) {
 
             let child = children[index];
             if(!peersMap.get(parseInt(child.getAttribute("peer_id")))) {
@@ -430,7 +430,7 @@ function updateParticipants() {
 
         let peerIndex = 0;
 
-        for (index = 0; index < childrenLeft.length; index ++) {
+        for (let index = 0; index < childrenLeft.length; index ++) {
 
             let child = childrenLeft[index];
             let childId = parseInt(child.getAttribute("peer_id"));
@@ -451,7 +451,7 @@ function updateParticipants() {
             }
         }
 
-        for (index = peerIndex; index < peers.length; index ++) {
+        for (let index = peerIndex; index < peers.length; index ++) {
             let peer = peers[index];
             if(peer.peerId !== peerId) {
                 let newChild = createParticipantElement(peer);
@@ -461,7 +461,7 @@ function updateParticipants() {
             }
         }
 
-        for (index = 0; index < childrenNew.length; index ++) {
+        for (let index = 0; index < childrenNew.length; index ++) {
             let child = childrenNew[index];
             window.getComputedStyle(child).opacity;
             childrenNew[index].classList.remove("peer_style_new");
@@ -473,7 +473,7 @@ function updateParticipants() {
 
 function sendFileChunks(message) {
 
-    for(i = 0; i < message.files.length; i++) {
+    for(let i = 0; i < message.files.length; i++) {
 
         let chunkInfo = message.files[i];
 
@@ -527,7 +527,7 @@ function handleFiles(files) {
 
     let filesJson = [];
 
-    for(index = 0; index < files.length; index ++ ) {
+    for(let index = 0; index < files.length; index ++ ) {
 
         let file = files[index];
         let fileId = nextFileId();
@@ -600,21 +600,38 @@ socket.onclose = function(event) {
 
 // message received - show the message in div#messages
 socket.onmessage = function(event) {
+    onMessage(JSON.parse(event.data));
+}
 
-    message = JSON.parse(event.data);
+function onMessage(message) {
 
     switch(message.code) {
 
         case CODE_INFO:
+
             peerId = message.peerId;
             peerName = message.peerName;
 
-            for (index = 0; index < message.peers.length; index++) {
+            for (let index = 0; index < message.peers.length; index++) {
                 let peer = message.peers[index];
                 peersMap.set(peer.peerId, peer);
             }
 
             updateParticipants();
+
+            if(message.history && message.history.length > 0) {
+                for (let index = 0; index < message.history.length; index++) {
+                    onMessage(message.history[index]);
+                }
+            } else {
+                onMessage({
+                    code: CODE_PEER_JOINED,
+                    peerId: peerId,
+                    peerName: peerName,
+                    message: peerName + " - joined room"
+                });
+            }
+
             break;
 
         case CODE_PEER_JOINED:
@@ -649,7 +666,6 @@ socket.onmessage = function(event) {
             break;
 
     }
-
 }
 
 function socketSendNextData(data) {

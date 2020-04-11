@@ -31,7 +31,10 @@
 #include "./Peer.hpp"
 #include "dto/DTOs.hpp"
 
+#include "oatpp/core/macro/component.hpp"
+
 #include <unordered_map>
+#include <list>
 
 class Room {
 private:
@@ -39,8 +42,12 @@ private:
   std::atomic<v_int64> m_fileIdCounter;
   std::unordered_map<v_int64, std::shared_ptr<File>> m_fileById;
   std::unordered_map<v_int64, std::shared_ptr<Peer>> m_peerById;
+  std::list<MessageDto::ObjectWrapper> m_history;
   std::mutex m_peerByIdLock;
   std::mutex m_fileByIdLock;
+  std::mutex m_historyLock;
+private:
+  OATPP_COMPONENT(ConfigDto::ObjectWrapper, m_appConfig);
 public:
 
   Room(const oatpp::String& name)
@@ -49,16 +56,28 @@ public:
   {}
 
   /**
+   * Get room name.
+   * @return
+   */
+  oatpp::String getName();
+
+  /**
    * Add peer to the room.
    * @param peer
    */
   void addPeer(const std::shared_ptr<Peer>& peer);
 
   /**
-   * Send room system info to peer.
+   * Inform the audience about the new peer.
    * @param peer
    */
   void welcomePeer(const std::shared_ptr<Peer>& peer);
+
+  /**
+   * Send info about other peers and available chat history to peer.
+   * @param peer
+   */
+  void onboardPeer(const std::shared_ptr<Peer>& peer);
 
   /**
    * Send peer left room message.
@@ -78,6 +97,18 @@ public:
    * @param peerId
    */
   void removePeerById(v_int64 peerId);
+
+  /**
+   * Add message to history.
+   * @param message
+   */
+  void addHistoryMessage(const MessageDto::ObjectWrapper& message);
+
+  /**
+   * Get list of history messages.
+   * @return
+   */
+  oatpp::List<MessageDto::ObjectWrapper>::ObjectWrapper getHistory();
 
   /**
    * Share file.
@@ -106,6 +137,12 @@ public:
    * Websocket-Ping all peers.
    */
   void pingAllPeers();
+
+  /**
+   * Check if room is empty (no peers in the room).
+   * @return
+   */
+  bool isEmpty();
 
 };
 

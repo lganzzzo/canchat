@@ -187,6 +187,7 @@ oatpp::async::CoroutineStarter Peer::handleFilesMessage(const MessageDto::Object
 
   }
 
+  m_room->addHistoryMessage(fileMessage);
   m_room->sendMessageAsync(fileMessage);
 
   return nullptr;
@@ -234,17 +235,10 @@ oatpp::async::CoroutineStarter Peer::handleMessage(const MessageDto::ObjectWrapp
 
   switch(message->code->getValue()) {
 
-    case MessageCodes::CODE_PEER_JOINED:
-      m_room->sendMessageAsync(message); break;
-
-    case MessageCodes::CODE_PEER_LEFT:
-      m_room->sendMessageAsync(message); break;
-
     case MessageCodes::CODE_PEER_MESSAGE:
-      m_room->sendMessageAsync(message); break;
-
-    case MessageCodes::CODE_PEER_MESSAGE_FILE:
-      m_room->sendMessageAsync(message); break;
+      m_room->addHistoryMessage(message);
+      m_room->sendMessageAsync(message);
+      break;
 
     case MessageCodes::CODE_PEER_IS_TYPING:
       m_room->sendMessageAsync(message); break;

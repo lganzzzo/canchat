@@ -26,12 +26,31 @@
 
 #include "Room.hpp"
 
+oatpp::String Room::getName() {
+  return m_name;
+}
+
 void Room::addPeer(const std::shared_ptr<Peer>& peer) {
   std::lock_guard<std::mutex> guard(m_peerByIdLock);
   m_peerById[peer->getPeerId()] = peer;
 }
 
 void Room::welcomePeer(const std::shared_ptr<Peer>& peer) {
+
+  /* Inform all that peer have joined the room */
+
+  auto joinedMessage = MessageDto::createShared();
+  joinedMessage->code = MessageCodes::CODE_PEER_JOINED;
+  joinedMessage->peerId = peer->getPeerId();
+  joinedMessage->peerName = peer->getNickname();
+  joinedMessage->message = peer->getNickname() + " - joined room";
+
+  addHistoryMessage(joinedMessage);
+  sendMessageAsync(joinedMessage);
+
+}
+
+void Room::onboardPeer(const std::shared_ptr<Peer>& peer) {
 
   auto infoMessage = MessageDto::createShared();
   infoMessage->code = MessageCodes::CODE_INFO;
@@ -50,15 +69,8 @@ void Room::welcomePeer(const std::shared_ptr<Peer>& peer) {
     }
   }
 
+  infoMessage->history = getHistory();
   peer->sendMessageAsync(infoMessage);
-
-  auto joinedMessage = MessageDto::createShared();
-  joinedMessage->code = MessageCodes::CODE_PEER_JOINED;
-  joinedMessage->peerId = peer->getPeerId();
-  joinedMessage->peerName = peer->getNickname();
-  joinedMessage->message = peer->getNickname() + " - joined room";
-
-  sendMessageAsync(joinedMessage);
 
 }
 
@@ -69,6 +81,7 @@ void Room::goodbyePeer(const std::shared_ptr<Peer>& peer) {
   message->peerId = peer->getPeerId();
   message->message = peer->getNickname() + " - left room";
 
+  addHistoryMessage(message);
   sendMessageAsync(message);
 
 }
@@ -101,6 +114,40 @@ void Room::removePeerById(v_int64 peerId) {
     m_peerById.erase(peerId);
 
   }
+
+}
+
+void Room::addHistoryMessage(const MessageDto::ObjectWrapper& message) {
+
+  if(!m_appConfig->maxRoomHistoryMessages || m_appConfig->maxRoomHistoryMessages->getValue() == 0) {
+    return;
+  }
+
+  std::lock_guard<std::mutex> guard(m_historyLock);
+
+  m_history.push_back(message);
+
+  while(m_history.size() > m_appConfig->maxRoomHistoryMessages) {
+    m_history.pop_front();
+  }
+
+}
+
+oatpp::List<MessageDto::ObjectWrapper>::ObjectWrapper Room::getHistory() {
+
+  if(!m_appConfig->maxRoomHistoryMessages || m_appConfig->maxRoomHistoryMessages->getValue() == 0) {
+    return nullptr;
+  }
+
+  auto result = oatpp::List<MessageDto::ObjectWrapper>::createShared();
+
+  std::lock_guard<std::mutex> guard(m_historyLock);
+
+  for(auto& message : m_history) {
+    result->pushBack(message);
+  }
+
+  return result;
 
 }
 
@@ -147,4 +194,8 @@ void Room::pingAllPeers() {
       break;
     }
   }
+}
+
+bool Room::isEmpty() {
+  return m_peerById.size() == 0;
 }
