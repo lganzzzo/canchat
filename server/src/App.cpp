@@ -70,7 +70,7 @@ void run(const oatpp::base::CommandLineArguments& args) {
 
   std::thread pingThread([]{
     OATPP_COMPONENT(std::shared_ptr<Lobby>, lobby);
-    lobby->runPingLoop(std::chrono::seconds(20));
+    lobby->runPingLoop(std::chrono::seconds(30));
   });
 
   serverThread.join();

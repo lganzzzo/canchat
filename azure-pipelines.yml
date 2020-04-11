@@ -1,0 +1,29 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+jobs:
+  - job: ubuntu_16_04
+    displayName: 'Build - Ubuntu 16.04'
+    continueOnError: false
+    pool:
+      vmImage: 'Ubuntu 16.04'
+    container:
+      image: lganzzzo/ubuntu-cmake-libressl:latest
+    workspace:
+      clean: all
+    steps:
+      - script: |
+          sudo ./install-oatpp-modules.sh
+        displayName: 'install oatpp modules'
+        workingDirectory: utility
+      - script: |
+          cmake ..
+          sudo make
+        displayName: 'CMake'
+        workingDirectory: server/build
+      - script: |
+          make test ARGS="-V"
+        displayName: 'Test'
+        workingDirectory: build

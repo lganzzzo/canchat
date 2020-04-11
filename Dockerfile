@@ -1,16 +1,19 @@
-FROM lganzzzo/alpine-cmake:latest
+FROM lganzzzo/ubuntu-cmake-libressl:latest
 
-ADD . /service
+WORKDIR /chat
 
-WORKDIR /service/utility
+ADD cert cert
+ADD front front
+ADD server server
+ADD utility utility
 
-RUN ./install-oatpp-modules.sh
+WORKDIR /chat/utility
 
-WORKDIR /service/build
+RUN /bin/bash ./install-oatpp-modules.sh Release
 
-RUN cmake ..
+WORKDIR /chat/server/build
+
+RUN cmake -DCMAKE_BUILD_TYPE=Release ..
 RUN make
 
-EXPOSE 8000 8000
-
-ENTRYPOINT ["./async-server-rooms-exe"]
+#ENTRYPOINT ["./canchat-exe"]
