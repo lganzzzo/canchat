@@ -19,6 +19,10 @@ jobs:
         displayName: 'install oatpp modules'
         workingDirectory: utility
       - script: |
+        mkdir build/
+        displayName: 'Create "build/" folder'
+        workingDirectory: server
+      - script: |
           cmake ..
           sudo make
         displayName: 'CMake'
