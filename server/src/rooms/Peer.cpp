@@ -67,8 +67,7 @@ bool Peer::sendPingAsync() {
     std::shared_ptr<AsyncWebSocket> m_websocket;
   public:
 
-    SendPingCoroutine(oatpp::async::Lock* lock,
-                      const std::shared_ptr<AsyncWebSocket>& websocket)
+    SendPingCoroutine(oatpp::async::Lock* lock, const std::shared_ptr<AsyncWebSocket>& websocket)
       : m_lock(lock)
       , m_websocket(websocket)
     {}
@@ -90,29 +89,178 @@ bool Peer::sendPingAsync() {
 
 }
 
-void Peer::validateFilesList(const MessageDto::FilesList::ObjectWrapper& filesList) {
+oatpp::async::CoroutineStarter Peer::onApiError(const oatpp::String& errorMessage) {
+
+  class SendErrorCoroutine : public oatpp::async::Coroutine<SendErrorCoroutine> {
+  private:
+    oatpp::async::Lock* m_lock;
+    std::shared_ptr<AsyncWebSocket> m_websocket;
+    oatpp::String m_message;
+  public:
+
+    SendErrorCoroutine(oatpp::async::Lock* lock,
+                       const std::shared_ptr<AsyncWebSocket>& websocket,
+                       const oatpp::String& message)
+      : m_lock(lock)
+      , m_websocket(websocket)
+      , m_message(message)
+    {}
+
+    Action act() override {
+      /* synchronized async pipeline */
+      return oatpp::async::synchronize(
+        /* Async write-lock to prevent concurrent writes to socket */
+        m_lock,
+        /* send error message, then close-frame */
+        std::move(m_websocket->sendOneFrameTextAsync(m_message).next(m_websocket->sendCloseAsync()))
+      ).next(
+        /* async error after error message and close-frame are sent */
+        new oatpp::async::Error("API Error")
+      );
+    }
+
+  };
+
+  auto message = MessageDto::createShared();
+  message->code = MessageCodes::CODE_API_ERROR;
+  message->message = errorMessage;
+
+  return SendErrorCoroutine::start(&m_writeLock, m_socket, m_objectMapper->writeToString(message));
+
+}
+
+oatpp::async::CoroutineStarter Peer::validateFilesList(const MessageDto::FilesList::ObjectWrapper& filesList) {
 
   auto curr = filesList->getFirstNode();
 
   if(!curr)
-    throw std::runtime_error("Files list is empty.");
+    return onApiError("Files list is empty.");
 
   while(curr != nullptr) {
 
     auto fileDto = curr->getData();
 
     if (!fileDto)
-      throw std::runtime_error("File structure is not provided.");
+      return onApiError("File structure is not provided.");
     if (!fileDto->clientFileId)
-      throw std::runtime_error("File clientId is not provided.");
+      return onApiError("File clientId is not provided.");
     if (!fileDto->name)
-      throw std::runtime_error("File name is not provided.");
+      return onApiError("File name is not provided.");
     if (!fileDto->size)
-      throw std::runtime_error("File size is not provided.");
+      return onApiError("File size is not provided.");
 
     curr = curr->getNext();
 
   }
+
+  return nullptr;
+
+}
+
+oatpp::async::CoroutineStarter Peer::handleFilesMessage(const MessageDto::ObjectWrapper& message) {
+
+  auto files = message->files;
+  validateFilesList(files);
+
+  auto fileMessage = MessageDto::createShared();
+  fileMessage->code = MessageCodes::CODE_PEER_MESSAGE_FILE;
+  fileMessage->peerId = m_peerId;
+  fileMessage->peerName = m_nickname;
+  fileMessage->timestamp = oatpp::base::Environment::getMicroTickCount();
+  fileMessage->files = MessageDto::FilesList::createShared();
+
+  auto curr = files->getFirstNode();
+  while(curr) {
+
+    auto currFile = curr->getData();
+
+    auto file = m_room->shareFile(m_peerId, currFile->clientFileId->getValue(), currFile->name, currFile->size->getValue());
+
+    auto sharedFile = FileDto::createShared();
+    sharedFile->serverFileId = file->getServerFileId();
+    sharedFile->name = file->getFileName();
+    sharedFile->size = file->getFileSize();
+
+    fileMessage->files->pushBack(sharedFile);
+
+    curr = curr->getNext();
+
+  }
+
+  m_room->sendMessageAsync(fileMessage);
+
+  return nullptr;
+
+}
+
+oatpp::async::CoroutineStarter Peer::handleFileChunkMessage(const MessageDto::ObjectWrapper& message) {
+
+  auto filesList = message->files;
+  if(!filesList)
+    return onApiError("No file provided.");
+
+  if(filesList->count() > 1)
+    return onApiError("Invalid files count. Expected - 1.");
+
+  auto fileDto = filesList->getFirst();
+  if (!fileDto)
+    return onApiError("File structure is not provided.");
+  if (!fileDto->serverFileId)
+    return onApiError("File clientId is not provided.");
+  if (!fileDto->subscriberId)
+    return onApiError("File subscriberId is not provided.");
+  if (!fileDto->data)
+    return onApiError("File chunk data is not provided.");
+
+  auto file = m_room->getFileById(fileDto->serverFileId->getValue());
+
+  if(!file) return nullptr; // Ignore if file doesn't exist. File may be deleted already.
+
+  if(file->getHost()->getPeerId() != getPeerId())
+    return onApiError("Wrong file host.");
+
+  auto data = oatpp::encoding::Base64::decode(fileDto->data);
+  file->provideFileChunk(fileDto->subscriberId->getValue(), data);
+
+  return nullptr;
+
+}
+
+oatpp::async::CoroutineStarter Peer::handleMessage(const MessageDto::ObjectWrapper& message) {
+
+  if(!message->code) {
+    return onApiError("No message code provided.");
+  }
+
+  switch(message->code->getValue()) {
+
+    case MessageCodes::CODE_PEER_JOINED:
+      m_room->sendMessageAsync(message); break;
+
+    case MessageCodes::CODE_PEER_LEFT:
+      m_room->sendMessageAsync(message); break;
+
+    case MessageCodes::CODE_PEER_MESSAGE:
+      m_room->sendMessageAsync(message); break;
+
+    case MessageCodes::CODE_PEER_MESSAGE_FILE:
+      m_room->sendMessageAsync(message); break;
+
+    case MessageCodes::CODE_PEER_IS_TYPING:
+      m_room->sendMessageAsync(message); break;
+
+    case MessageCodes::CODE_FILE_SHARE:
+      return handleFilesMessage(message);
+
+    case MessageCodes::CODE_FILE_CHUNK_DATA:
+      return handleFileChunkMessage(message);
+
+    default:
+      return onApiError("Invalid client message code.");
+
+  }
+
+  return nullptr;
 
 }
 
@@ -124,8 +272,8 @@ oatpp::String Peer::getNickname() {
   return m_nickname;
 }
 
-v_int64 Peer::getUserId() {
-  return m_userId;
+v_int64 Peer::getPeerId() {
+  return m_peerId;
 }
 
 void Peer::addFile(const std::shared_ptr<File>& file) {
@@ -138,7 +286,7 @@ const std::list<std::shared_ptr<File>>& Peer::getFiles() {
 
 void Peer::invalidateSocket() {
   if(m_socket) {
-    serverConnectionProvider->invalidateConnection(m_socket->getConnection());
+    m_serverConnectionProvider->invalidateConnection(m_socket->getConnection());
   }
   m_socket.reset();
 }
@@ -158,100 +306,28 @@ oatpp::async::CoroutineStarter Peer::onClose(const std::shared_ptr<AsyncWebSocke
 
 oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebSocket>& socket, v_uint8 opcode, p_char8 data, oatpp::v_io_size size) {
 
+  if(m_messageBuffer.getSize() + size >  m_appConfig->maxMessageSizeBytes) {
+    return onApiError("Message size exceeds max allowed size.");
+  }
+
   if(size == 0) { // message transfer finished
 
     auto wholeMessage = m_messageBuffer.toString();
     m_messageBuffer.clear();
 
-    auto message = m_objectMapper->readFromString<MessageDto>(wholeMessage);
+    MessageDto::ObjectWrapper message;
+
+    try {
+      message = m_objectMapper->readFromString<MessageDto>(wholeMessage);
+    } catch (const std::runtime_error& e) {
+      return onApiError("Can't parse message");
+    }
+
     message->peerName = m_nickname;
-    message->peerId = m_userId;
+    message->peerId = m_peerId;
     message->timestamp = oatpp::base::Environment::getMicroTickCount();
 
-    if(!message->code) {
-      throw std::runtime_error("No message code provided.");
-    }
-
-    switch(message->code->getValue()) {
-
-      case MessageCodes::CODE_PEER_JOINED:
-        m_room->sendMessageAsync(message); break;
-      case MessageCodes::CODE_PEER_LEFT:
-        m_room->sendMessageAsync(message); break;
-      case MessageCodes::CODE_PEER_MESSAGE:
-        m_room->sendMessageAsync(message); break;
-      case MessageCodes::CODE_PEER_MESSAGE_FILE:
-        m_room->sendMessageAsync(message); break;
-      case MessageCodes::CODE_PEER_IS_TYPING:
-        m_room->sendMessageAsync(message); break;
-      case MessageCodes::CODE_FILE_SHARE:
-        {
-          auto files = message->files;
-          validateFilesList(files);
-
-          auto fileMessage = MessageDto::createShared();
-          fileMessage->code = MessageCodes::CODE_PEER_MESSAGE_FILE;
-          fileMessage->peerId = m_userId;
-          fileMessage->peerName = m_nickname;
-          fileMessage->timestamp = oatpp::base::Environment::getMicroTickCount();
-          fileMessage->files = MessageDto::FilesList::createShared();
-
-          auto curr = files->getFirstNode();
-          while(curr) {
-
-            auto currFile = curr->getData();
-
-            auto file = m_room->shareFile(m_userId, currFile->clientFileId->getValue(), currFile->name, currFile->size->getValue());
-
-            auto sharedFile = FileDto::createShared();
-            sharedFile->serverFileId = file->getServerFileId();
-            sharedFile->name = file->getFileName();
-            sharedFile->size = file->getFileSize();
-
-            fileMessage->files->pushBack(sharedFile);
-
-            curr = curr->getNext();
-
-          }
-
-          m_room->sendMessageAsync(fileMessage);
-
-        }
-        break;
-
-      case MessageCodes::CODE_FILE_CHUNK_DATA:
-        {
-          auto filesList = message->files;
-          if(!filesList)
-            throw std::runtime_error("No file provided.");
-
-          if(filesList->count() > 1)
-            throw std::runtime_error("Invalid files count. Expected - 1.");
-
-          auto fileDto = filesList->getFirst();
-          if (!fileDto)
-            throw std::runtime_error("File structure is not provided.");
-          if (!fileDto->serverFileId)
-            throw std::runtime_error("File clientId is not provided.");
-          if (!fileDto->subscriberId)
-            throw std::runtime_error("File subscriberId is not provided.");
-          if (!fileDto->data)
-            throw std::runtime_error("File chunk data is not provided.");
-
-          auto file = m_room->getFileById(fileDto->serverFileId->getValue());
-          if(!file) break; // Ignore if file doesn't exist. File may be deleted already.
-          if(file->getHost()->getUserId() != getUserId())
-            throw std::runtime_error("Wrong file host.");
-
-          auto data = oatpp::encoding::Base64::decode(fileDto->data);
-          file->provideFileChunk(fileDto->subscriberId->getValue(), data);
-
-        }
-        break;
-
-      default:
-        throw std::runtime_error("Invalid client message code.");
-    }
+    return handleMessage(message);
 
   } else if(size > 0) { // message frame received
     m_messageBuffer.writeSimple(data, size);

@@ -28,6 +28,7 @@
 #define ASYNC_SERVER_ROOMS_PEER_HPP
 
 #include "dto/DTOs.hpp"
+#include "dto/Config.hpp"
 #include "rooms/File.hpp"
 
 #include "oatpp-websocket/AsyncWebSocket.hpp"
@@ -58,33 +59,41 @@ private:
   std::shared_ptr<AsyncWebSocket> m_socket;
   std::shared_ptr<Room> m_room;
   oatpp::String m_nickname;
-  v_int64 m_userId;
+  v_int64 m_peerId;
 private:
   std::atomic<v_int32> m_pingPoingCounter;
   std::list<std::shared_ptr<File>> m_files;
 private:
 
-  /**
-   * Inject async executor object.
-   */
+  /* Inject application components */
+
   OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, m_asyncExecutor);
   OATPP_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>, m_objectMapper);
-  OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, serverConnectionProvider);
+  OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, m_serverConnectionProvider);
+  OATPP_COMPONENT(ConfigDto::ObjectWrapper, m_appConfig);
 
 private:
 
-  void validateFilesList(const MessageDto::FilesList::ObjectWrapper& filesList);
+  oatpp::async::CoroutineStarter onApiError(const oatpp::String& errorMessage);
+
+private:
+
+  oatpp::async::CoroutineStarter validateFilesList(const MessageDto::FilesList::ObjectWrapper& filesList);
+  oatpp::async::CoroutineStarter handleFilesMessage(const MessageDto::ObjectWrapper& message);
+  oatpp::async::CoroutineStarter handleFileChunkMessage(const MessageDto::ObjectWrapper& message);
+
+  oatpp::async::CoroutineStarter handleMessage(const MessageDto::ObjectWrapper& message);
 
 public:
 
   Peer(const std::shared_ptr<AsyncWebSocket>& socket,
        const std::shared_ptr<Room>& room,
        const oatpp::String& nickname,
-       v_int64 userId)
+       v_int64 peerId)
     : m_socket(socket)
     , m_room(room)
     , m_nickname(nickname)
-    , m_userId(userId)
+    , m_peerId(peerId)
     , m_pingPoingCounter(0)
   {}
 
@@ -114,10 +123,10 @@ public:
   oatpp::String getNickname();
 
   /**
-   * Get peer userId.
+   * Get peer peerId.
    * @return
    */
-  v_int64 getUserId();
+  v_int64 getPeerId();
 
   /**
    * Add file shared by user. (for indexing purposes)

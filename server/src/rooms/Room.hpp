@@ -68,26 +68,26 @@ public:
 
   /**
    * Get peer by id.
-   * @param userId
+   * @param peerId
    * @return
    */
-  std::shared_ptr<Peer> getPeerById(v_int64 userId);
+  std::shared_ptr<Peer> getPeerById(v_int64 peerId);
 
   /**
    * Remove peer from the room.
-   * @param userId
+   * @param peerId
    */
-  void removePeerByUserId(v_int64 userId);
+  void removePeerById(v_int64 peerId);
 
   /**
    * Share file.
-   * @param hostUserId
+   * @param hostPeerId
    * @param fileClientId
    * @param fileName
    * @param fileSize
    * @return
    */
-  std::shared_ptr<File> shareFile(v_int64 hostUserId, v_int64 clientFileId, const oatpp::String& fileName, v_int64 fileSize);
+  std::shared_ptr<File> shareFile(v_int64 hostPeerId, v_int64 clientFileId, const oatpp::String& fileName, v_int64 fileSize);
 
   /**
    * Get file by id.

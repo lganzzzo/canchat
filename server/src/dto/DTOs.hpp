@@ -45,6 +45,8 @@ enum MessageCodes : v_int64 {
   CODE_FILE_REQUEST_CHUNK = 7,
   CODE_FILE_CHUNK_DATA = 8,
 
+  CODE_API_ERROR = 9
+
 };
 
 class PeerDto : public oatpp::data::mapping::type::Object {

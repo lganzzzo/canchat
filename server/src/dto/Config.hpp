@@ -43,6 +43,12 @@ public:
   DTO_FIELD(UInt16, port);
   DTO_FIELD(Boolean, useTLS) = true;
 
+  /**
+   * Max size of the received bytes. (the whole MessageDto structure).
+   * The actual payload is smaller.
+   */
+  DTO_FIELD(UInt64, maxMessageSizeBytes) = 8 * 1024; // Default - 8Kb
+
 public:
 
   oatpp::String getWebsocketBaseUrl() {

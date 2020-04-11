@@ -28,14 +28,14 @@
 
 void Room::addPeer(const std::shared_ptr<Peer>& peer) {
   std::lock_guard<std::mutex> guard(m_peerByIdLock);
-  m_peerById[peer->getUserId()] = peer;
+  m_peerById[peer->getPeerId()] = peer;
 }
 
 void Room::welcomePeer(const std::shared_ptr<Peer>& peer) {
 
   auto infoMessage = MessageDto::createShared();
   infoMessage->code = MessageCodes::CODE_INFO;
-  infoMessage->peerId = peer->getUserId();
+  infoMessage->peerId = peer->getPeerId();
   infoMessage->peerName = peer->getNickname();
 
   infoMessage->peers = infoMessage->peers->createShared();
@@ -44,7 +44,7 @@ void Room::welcomePeer(const std::shared_ptr<Peer>& peer) {
     std::lock_guard<std::mutex> guard(m_peerByIdLock);
     for (auto &it : m_peerById) {
       auto p = PeerDto::createShared();
-      p->peerId = it.second->getUserId();
+      p->peerId = it.second->getPeerId();
       p->peerName = it.second->getNickname();
       infoMessage->peers->pushBack(p);
     }
@@ -54,7 +54,7 @@ void Room::welcomePeer(const std::shared_ptr<Peer>& peer) {
 
   auto joinedMessage = MessageDto::createShared();
   joinedMessage->code = MessageCodes::CODE_PEER_JOINED;
-  joinedMessage->peerId = peer->getUserId();
+  joinedMessage->peerId = peer->getPeerId();
   joinedMessage->peerName = peer->getNickname();
   joinedMessage->message = peer->getNickname() + " - joined room";
 
@@ -66,26 +66,26 @@ void Room::goodbyePeer(const std::shared_ptr<Peer>& peer) {
 
   auto message = MessageDto::createShared();
   message->code = MessageCodes::CODE_PEER_LEFT;
-  message->peerId = peer->getUserId();
+  message->peerId = peer->getPeerId();
   message->message = peer->getNickname() + " - left room";
 
   sendMessageAsync(message);
 
 }
 
-std::shared_ptr<Peer> Room::getPeerById(v_int64 userId) {
+std::shared_ptr<Peer> Room::getPeerById(v_int64 peerId) {
   std::lock_guard<std::mutex> guard(m_peerByIdLock);
-  auto it = m_peerById.find(userId);
+  auto it = m_peerById.find(peerId);
   if(it != m_peerById.end()) {
     return it->second;
   }
   return nullptr;
 }
 
-void Room::removePeerByUserId(v_int64 userId) {
+void Room::removePeerById(v_int64 peerId) {
 
   std::lock_guard<std::mutex> guard(m_peerByIdLock);
-  auto peer = m_peerById.find(userId);
+  auto peer = m_peerById.find(peerId);
 
   if(peer != m_peerById.end()) {
 
@@ -98,17 +98,17 @@ void Room::removePeerByUserId(v_int64 userId) {
 
     }
 
-    m_peerById.erase(userId);
+    m_peerById.erase(peerId);
 
   }
 
 }
 
-std::shared_ptr<File> Room::shareFile(v_int64 hostUserId, v_int64 clientFileId, const oatpp::String& fileName, v_int64 fileSize) {
+std::shared_ptr<File> Room::shareFile(v_int64 hostPeerId, v_int64 clientFileId, const oatpp::String& fileName, v_int64 fileSize) {
 
   std::lock_guard<std::mutex> guard(m_fileByIdLock);
 
-  auto host = getPeerById(hostUserId);
+  auto host = getPeerById(hostPeerId);
   if(!host) throw std::runtime_error("File host not found.");
 
   v_int64 serverFileId = m_fileIdCounter ++;
