@@ -44,6 +44,17 @@ public:
   DTO_FIELD(Boolean, useTLS) = true;
 
   /**
+   * Path to TLS private key file.
+   */
+  DTO_FIELD(String, tlsPrivateKeyPath);
+
+  /**
+   * Path to TLS certificate chain file.
+   */
+  DTO_FIELD(String, tlsCertificateChainPath);
+
+
+  /**
    * Max size of the received bytes. (the whole MessageDto structure).
    * The actual payload is smaller.
    */

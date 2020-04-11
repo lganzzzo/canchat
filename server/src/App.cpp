@@ -61,9 +61,6 @@ void run(const oatpp::base::CommandLineArguments& args) {
   /* Create server which takes provided TCP connections and passes them to HTTP connection handler */
   oatpp::network::server::Server server(connectionProvider, connectionHandler);
 
-  /* Priny info about server port */
-  OATPP_LOGI("MyApp", "Server running on port %s", connectionProvider->getProperty("port").getData());
-
   std::thread serverThread([&server]{
     server.run();
   });
@@ -72,6 +69,14 @@ void run(const oatpp::base::CommandLineArguments& args) {
     OATPP_COMPONENT(std::shared_ptr<Lobby>, lobby);
     lobby->runPingLoop(std::chrono::seconds(30));
   });
+
+  OATPP_COMPONENT(ConfigDto::ObjectWrapper, appConfig);
+
+  if(appConfig->useTLS) {
+    OATPP_LOGI("canchat", "clients are expected to connect at https://%s:%d/", appConfig->host->getData(), appConfig->port->getValue());
+  } else {
+    OATPP_LOGI("canchat", "clients are expected to connect at http://%s:%d/", appConfig->host->getData(), appConfig->port->getValue());
+  }
 
   serverThread.join();
 

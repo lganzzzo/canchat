@@ -43,6 +43,8 @@
 
 #include "oatpp/core/utils/ConversionUtils.hpp"
 
+#include <cstdlib>
+
 /**
  *  Class which creates and holds Application components and registers components in oatpp::base::Environment
  *  Order of components initialization is from top to bottom
@@ -63,16 +65,33 @@ public:
 
     auto config = ConfigDto::createShared();
 
-    config->host = m_cmdArgs.getNamedArgumentValue("--host", "localhost");
-    auto portText = m_cmdArgs.getNamedArgumentValue("--port", "8443");
+    config->host = std::getenv("EXTERNAL_ADDRESS");
+    if (!config->host) {
+      config->host = m_cmdArgs.getNamedArgumentValue("--host", "localhost");
+    }
+
+    const char* portText = std::getenv("EXTERNAL_PORT");
+    if(!portText) {
+      portText = m_cmdArgs.getNamedArgumentValue("--port", "8443");
+    }
 
     bool success;
     auto port = oatpp::utils::conversion::strToUInt32(portText, success);
     if(!success || port > 65535) {
       throw std::runtime_error("Invalid port!");
     }
-
     config->port = (v_uint16) port;
+
+    config->tlsPrivateKeyPath = std::getenv("TLS_FILE_PRIVATE_KEY");
+    if(!config->tlsPrivateKeyPath) {
+      config->tlsPrivateKeyPath = m_cmdArgs.getNamedArgumentValue("--tls-key", "" CERT_PEM_PATH);
+    }
+
+    config->tlsCertificateChainPath = std::getenv("TLS_FILE_CERT_CHAIN");
+    if(!config->tlsCertificateChainPath) {
+      config->tlsCertificateChainPath = m_cmdArgs.getNamedArgumentValue("--tls-chain", "" CERT_CRT_PATH);
+    }
+
     return config;
 
   }());
@@ -95,9 +114,13 @@ public:
 
     if(appConfig->useTLS) {
 
-      OATPP_LOGD("oatpp::libressl::Config", "pem='%s'", CERT_PEM_PATH);
-      OATPP_LOGD("oatpp::libressl::Config", "crt='%s'", CERT_CRT_PATH);
-      auto config = oatpp::libressl::Config::createDefaultServerConfigShared(CERT_CRT_PATH, CERT_PEM_PATH /* private key */);
+      OATPP_LOGD("oatpp::libressl::Config", "key_path='%s'", appConfig->tlsPrivateKeyPath->c_str());
+      OATPP_LOGD("oatpp::libressl::Config", "chn_path='%s'", appConfig->tlsCertificateChainPath->c_str());
+
+      auto config = oatpp::libressl::Config::createDefaultServerConfigShared(
+        appConfig->tlsCertificateChainPath->c_str(),
+        appConfig->tlsPrivateKeyPath->c_str()
+      );
 
       /**
        * if you see such error:

@@ -1,4 +1,4 @@
-# Can-Chat
+# Can-Chat [![Build Status](https://dev.azure.com/lganzzzo/lganzzzo/_apis/build/status/lganzzzo.canchat?branchName=master)](https://dev.azure.com/lganzzzo/lganzzzo/_build/latest?definitionId=24&branchName=master)
 
 Full-stack (Client + Server) anonymous and secure chat.  
 
