@@ -19,7 +19,7 @@ jobs:
         displayName: 'install oatpp modules'
         workingDirectory: utility
       - script: |
-        mkdir build/
+          mkdir build/
         displayName: 'Create "build/" folder'
         workingDirectory: server
       - script: |
