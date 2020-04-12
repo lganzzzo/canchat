@@ -16,4 +16,4 @@ WORKDIR /chat/server/build
 RUN cmake -DCMAKE_BUILD_TYPE=Release ..
 RUN make
 
-#ENTRYPOINT ["./canchat-exe"]
+ENTRYPOINT ["./canchat-exe"]
