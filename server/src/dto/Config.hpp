@@ -69,7 +69,16 @@ public:
 
   oatpp::String getHostString() {
     oatpp::data::stream::BufferOutputStream stream(256, 256);
-    stream << host << ":" << port;
+    v_uint16 defPort;
+    if(useTLS) {
+      defPort = 443;
+    } else {
+      defPort = 80;
+    }
+    stream << host;
+    if(!port || defPort != port->getValue()) {
+      stream << ":" << port;
+    }
     return stream.toString();
   }
 
