@@ -10,7 +10,7 @@ Feature-complete rooms-based chat for tens of thousands users. Client plus Serve
    ```bash
    docker run -p 8443:8443 -e EXTERNAL_ADDRESS=localhost -e EXTERNAL_PORT=8443 -it lganzzzo/canchat
    ```
-- [Build from source](#Build_And_Run)
+- [Build from source](#build-from-source)
 
 ## Chat
 
