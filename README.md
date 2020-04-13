@@ -8,7 +8,7 @@ Feature-complete rooms-based chat for tens of thousands users. Client plus Serve
 
 ## Quick Start
 
-- Demo node - [https://canchat.dev/](https://chanchat.dev/)
+- Demo node - [https://canchat.dev/](https://canchat.dev/)
 - Run your own in Docker:
    ```bash
    docker run -p 8443:8443 -e EXTERNAL_ADDRESS=localhost -e EXTERNAL_PORT=8443 -it lganzzzo/canchat
