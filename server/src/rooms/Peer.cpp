@@ -78,6 +78,17 @@ bool Peer::sendPingAsync() {
 
   };
 
+  /******************************************************
+   *
+   * Ping counter is increased on sending ping
+   * and decreased on receiving pong from the client.
+   *
+   * If the server didn't receive pong from client
+   * before the next ping,- then the client is
+   * considered to be disconnected.
+   *
+   ******************************************************/
+
   ++ m_pingPoingCounter;
 
   if(m_socket && m_pingPoingCounter == 1) {

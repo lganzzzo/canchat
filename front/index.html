@@ -165,39 +165,34 @@
             <p>
                 All communication happens in chat-rooms.
                 Each room has a unique URL.
-                Anyone who has room-URL can join the room.
-                Generating random long enough room-URL gives privacy to participants. Be sure to share room-URL with wanted participants only.
+                Anyone who has room-URL can join the room. Generating random long enough room-URL gives privacy to participants.
+                Be sure to share room-URL with wanted participants only.
             </p>
 
             <p>
-                Rooms are automatically created when the first participant joins the room, and
-                are automatically deleted when the last participant leaves the room.
+                Rooms are automatically created when the first participant joins the room,
+                and are automatically deleted when the last participant leaves the room.
             </p>
 
             <p>
-                No history is maintained within the room.
-                No chat-history is available for newly joined participants.
+                Chat-history is available for newly joined participants.
+                History is rounded when the number of messages in the room exceeds the <code>maxRoomHistoryMessages</code> config parameter.
+                History is deleted and no-longer-available once the room is deleted.
             </p>
 
             <h3>File Sharing</h3>
 
             <p>
-                Files are streamed directly from the host-peer machine.
-                Nothing is uploaded to the server nor stored in any 3d-party place.
+                Users can share multiple files at once.
+            </p>
+
+            <p>
+                Files are streamed directly from the host-peer machine. Nothing is uploaded to the server nor stored in any 3d-party place.
             </p>
 
             <p>
                 Once host-peer cancels file-sharing, files are no longer available.
-                If host-peer exits the room, all of its file-sharing is canceled.
-            </p>
-
-            <h3>Warning</h3>
-
-            <p style="color: red">
-                <i>
-                There is NO moderation available in chat-rooms. Chat-rooms are completele private and service owners have no control over the content. <br>
-                This service is NOT recommended for use by sensitive people.
-                </i>
+                If host-peer exits the room, all of his file-sharing is canceled.
             </p>
 
         </div>
