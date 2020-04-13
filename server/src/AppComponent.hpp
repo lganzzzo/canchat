@@ -29,6 +29,7 @@
 
 #include "rooms/Lobby.hpp"
 #include "dto/Config.hpp"
+#include "utils/Statistics.hpp"
 
 #include "oatpp-libressl/server/ConnectionProvider.hpp"
 #include "oatpp-libressl/Config.hpp"
@@ -183,6 +184,13 @@ public:
     auto mapper = oatpp::parser::json::mapping::ObjectMapper::createShared();
     mapper->getSerializer()->getConfig()->includeNullFields = false;
     return mapper;
+  }());
+
+  /**
+   *  Create statistics object
+   */
+  OATPP_CREATE_COMPONENT(std::shared_ptr<Statistics>, statistics)([] {
+    return std::make_shared<Statistics>();
   }());
 
   /**

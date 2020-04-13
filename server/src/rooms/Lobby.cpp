@@ -76,6 +76,8 @@ void Lobby::runPingLoop(const std::chrono::duration<v_int64, std::micro>& interv
 
 void Lobby::onAfterCreate_NonBlocking(const std::shared_ptr<AsyncWebSocket>& socket, const std::shared_ptr<const ParameterMap>& params) {
 
+  ++ m_statistics->EVENT_PEER_CONNECTED;
+
   auto roomName = params->find("roomName")->second;
   auto nickname = params->find("nickname")->second;
   auto room = getOrCreateRoom(roomName);
@@ -90,6 +92,8 @@ void Lobby::onAfterCreate_NonBlocking(const std::shared_ptr<AsyncWebSocket>& soc
 }
 
 void Lobby::onBeforeDestroy_NonBlocking(const std::shared_ptr<AsyncWebSocket>& socket) {
+
+  ++ m_statistics->EVENT_PEER_DISCONNECTED;
 
   auto peer = std::static_pointer_cast<Peer>(socket->getListener());
   auto room = peer->getRoom();

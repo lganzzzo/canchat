@@ -30,6 +30,7 @@
 #include "./File.hpp"
 #include "./Peer.hpp"
 #include "dto/DTOs.hpp"
+#include "utils/Statistics.hpp"
 
 #include "oatpp/core/macro/component.hpp"
 
@@ -48,12 +49,19 @@ private:
   std::mutex m_historyLock;
 private:
   OATPP_COMPONENT(ConfigDto::ObjectWrapper, m_appConfig);
+  OATPP_COMPONENT(std::shared_ptr<Statistics>, m_statistics);
 public:
 
   Room(const oatpp::String& name)
     : m_name(name)
     , m_fileIdCounter(1)
-  {}
+  {
+    ++ m_statistics->EVENT_ROOM_CREATED;
+  }
+
+  ~Room() {
+    ++ m_statistics->EVENT_ROOM_DELETED;
+  }
 
   /**
    * Get room name.

@@ -41,8 +41,9 @@ class StaticController : public oatpp::web::server::api::ApiController {
 private:
   typedef StaticController __ControllerType;
 private:
-
   OATPP_COMPONENT(ConfigDto::ObjectWrapper, m_config);
+  OATPP_COMPONENT(std::shared_ptr<Statistics>, m_statistics);
+private:
 
   static oatpp::String loadFile(const char* filename) {
     auto buffer = oatpp::base::StrBuffer::loadFromFile(filename);
@@ -60,6 +61,7 @@ public:
     ENDPOINT_ASYNC_INIT(Root)
 
     Action act() override {
+      ++ controller->m_statistics->EVENT_FRONT_PAGE_LOADED;
       /*static*/ auto fileCache = loadFile(FRONT_PATH "/index.html");
       auto response = controller->createResponse(Status::CODE_200, fileCache);
       response->putHeader(Header::CONTENT_TYPE, "text/html");

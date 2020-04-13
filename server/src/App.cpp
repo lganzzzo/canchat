@@ -70,6 +70,11 @@ void run(const oatpp::base::CommandLineArguments& args) {
     lobby->runPingLoop(std::chrono::seconds(30));
   });
 
+  std::thread statThread([]{
+    OATPP_COMPONENT(std::shared_ptr<Statistics>, statistics);
+    statistics->runStatLoop();
+  });
+
   OATPP_COMPONENT(ConfigDto::ObjectWrapper, appConfig);
 
   if(appConfig->useTLS) {
@@ -81,6 +86,8 @@ void run(const oatpp::base::CommandLineArguments& args) {
   OATPP_LOGI("canchat", "canonical base URL='%s'", appConfig->getCanonicalBaseUrl()->getData());
 
   serverThread.join();
+  pingThread.join();
+  statThread.join();
 
 }
 

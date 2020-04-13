@@ -30,6 +30,7 @@
 #include "dto/DTOs.hpp"
 #include "dto/Config.hpp"
 #include "rooms/File.hpp"
+#include "utils/Statistics.hpp"
 
 #include "oatpp-websocket/AsyncWebSocket.hpp"
 
@@ -71,6 +72,7 @@ private:
   OATPP_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>, m_objectMapper);
   OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, m_serverConnectionProvider);
   OATPP_COMPONENT(ConfigDto::ObjectWrapper, m_appConfig);
+  OATPP_COMPONENT(std::shared_ptr<Statistics>, m_statistics);
 
 private:
 

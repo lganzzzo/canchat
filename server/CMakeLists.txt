@@ -23,8 +23,11 @@ add_library(${project_name}-lib
         src/rooms/Lobby.hpp
         src/utils/Nickname.cpp
         src/utils/Nickname.hpp
+        src/utils/Statistics.cpp
+        src/utils/Statistics.hpp
         src/dto/DTOs.hpp
-        src/dto/Config.hpp)
+        src/dto/Config.hpp
+)
 
 ## link libs
 

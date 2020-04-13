@@ -28,6 +28,7 @@
 #define FileController_hpp
 
 #include "rooms/Lobby.hpp"
+#include "utils/Statistics.hpp"
 
 #include "oatpp/web/protocol/http/outgoing/StreamingBody.hpp"
 #include "oatpp/web/server/api/ApiController.hpp"
@@ -58,6 +59,8 @@ public:
     class ReadCallback : public oatpp::data::stream::ReadCallback {
     private:
       std::shared_ptr<File::Subscriber> m_subscriber;
+    private:
+      OATPP_COMPONENT(std::shared_ptr<Statistics>, m_statistics);
     public:
 
       ReadCallback(const std::shared_ptr<File::Subscriber>& subscriber)
@@ -65,7 +68,11 @@ public:
       {}
 
       oatpp::v_io_size read(void *buffer, v_buff_size count, oatpp::async::Action& action) override {
-        return m_subscriber->readChunk(buffer, count, action);
+        auto res = m_subscriber->readChunk(buffer, count, action);
+        if(res > 0) {
+          m_statistics->FILE_SERVED_BYTES += (v_uint64) res;
+        }
+        return res;
       }
 
     };

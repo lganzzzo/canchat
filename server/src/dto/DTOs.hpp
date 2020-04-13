@@ -27,7 +27,7 @@
 #ifndef DTOs_hpp
 #define DTOs_hpp
 
-#include "oatpp/core/data/mapping/type/Object.hpp"
+#include "oatpp/core/Types.hpp"
 #include "oatpp/core/macro/codegen.hpp"
 
 #include OATPP_CODEGEN_BEGIN(DTO)
@@ -49,7 +49,7 @@ enum MessageCodes : v_int64 {
 
 };
 
-class PeerDto : public oatpp::data::mapping::type::Object {
+class PeerDto : public oatpp::Object {
 public:
 
   DTO_INIT(PeerDto, Object)
@@ -59,7 +59,7 @@ public:
 
 };
 
-class FileDto : public oatpp::data::mapping::type::Object {
+class FileDto : public oatpp::Object {
 
   DTO_INIT(FileDto, Object)
 
@@ -75,7 +75,7 @@ class FileDto : public oatpp::data::mapping::type::Object {
 
 };
 
-class MessageDto : public oatpp::data::mapping::type::Object {
+class MessageDto : public oatpp::Object {
 public:
   typedef List<FileDto::ObjectWrapper> FilesList;
 public:
@@ -92,6 +92,27 @@ public:
   DTO_FIELD(List<MessageDto::ObjectWrapper>::ObjectWrapper, history);
 
   DTO_FIELD(List<FileDto::ObjectWrapper>::ObjectWrapper, files);
+
+};
+
+class StatPointDto : public oatpp::Object {
+
+  DTO_INIT(StatPointDto, Object);
+
+  DTO_FIELD(Int64, timestamp);
+
+  DTO_FIELD(UInt64, evFrontpageLoaded, "ev_front_page_loaded");
+
+  DTO_FIELD(UInt64, evPeerConnected, "ev_peer_connected");
+  DTO_FIELD(UInt64, evPeerDisconnected, "ev_peer_disconnected");
+  DTO_FIELD(UInt64, evPeerZombieDropped, "ev_peer_zombie_dropped");
+  DTO_FIELD(UInt64, evPeerSendMessage, "ev_peer_send_message");
+  DTO_FIELD(UInt64, evPeerShareFile, "ev_peer_share_file");
+
+  DTO_FIELD(UInt64, evRoomCreated, "ev_room_created");
+  DTO_FIELD(UInt64, evRoomDeleted, "ev_room_deleted");
+
+  DTO_FIELD(UInt64, fileServedBytes, "file_served_bytes");
 
 };
 

@@ -249,6 +249,7 @@ oatpp::async::CoroutineStarter Peer::handleMessage(const MessageDto::ObjectWrapp
     case MessageCodes::CODE_PEER_MESSAGE:
       m_room->addHistoryMessage(message);
       m_room->sendMessageAsync(message);
+      ++ m_statistics->EVENT_PEER_SEND_MESSAGE;
       break;
 
     case MessageCodes::CODE_PEER_IS_TYPING:

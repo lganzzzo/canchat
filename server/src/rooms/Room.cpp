@@ -165,6 +165,8 @@ std::shared_ptr<File> Room::shareFile(v_int64 hostPeerId, v_int64 clientFileId, 
 
   m_fileById[serverFileId] = file;
 
+  ++ m_statistics->EVENT_PEER_SHARE_FILE;
+
   return file;
 
 }
@@ -191,7 +193,7 @@ void Room::pingAllPeers() {
     auto& peer = pair.second;
     if(!peer->sendPingAsync()) {
       peer->invalidateSocket();
-      break;
+      ++ m_statistics->EVENT_PEER_ZOMBIE_DROPPED;
     }
   }
 }

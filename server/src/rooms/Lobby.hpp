@@ -28,6 +28,7 @@
 #define ASYNC_SERVER_ROOMS_LOBBY_HPP
 
 #include "./Room.hpp"
+#include "utils/Statistics.hpp"
 
 #include "oatpp-websocket/AsyncConnectionHandler.hpp"
 
@@ -39,6 +40,8 @@ public:
   std::atomic<v_int64> m_peerIdCounter;
   std::unordered_map<oatpp::String, std::shared_ptr<Room>> m_rooms;
   std::mutex m_roomsMutex;
+private:
+  OATPP_COMPONENT(std::shared_ptr<Statistics>, m_statistics);
 public:
 
   Lobby()
