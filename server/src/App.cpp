@@ -78,6 +78,8 @@ void run(const oatpp::base::CommandLineArguments& args) {
     OATPP_LOGI("canchat", "clients are expected to connect at http://%s:%d/", appConfig->host->getData(), appConfig->port->getValue());
   }
 
+  OATPP_LOGI("canchat", "canonical base URL='%s'", appConfig->getCanonicalBaseUrl()->getData());
+
   serverThread.join();
 
 }

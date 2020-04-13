@@ -75,12 +75,18 @@ public:
 
   oatpp::String getCanonicalBaseUrl() {
     oatpp::data::stream::BufferOutputStream stream(256, 256);
+    v_uint16 defPort;
     if(useTLS) {
       stream << "https://";
+      defPort = 443;
     } else {
       stream << "http://";
+      defPort = 80;
     }
-    stream << host << ":" << port;
+    stream << host;
+    if(!port || defPort != port->getValue()) {
+      stream << ":" << port;
+    }
     return stream.toString();
   }
 
