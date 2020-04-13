@@ -33,6 +33,7 @@
 #include "oatpp-libressl/server/ConnectionProvider.hpp"
 #include "oatpp-libressl/Config.hpp"
 
+#include "oatpp/web/server/handler/Interceptor.hpp"
 #include "oatpp/web/server/AsyncHttpConnectionHandler.hpp"
 #include "oatpp/web/server/HttpRouter.hpp"
 
@@ -50,6 +51,26 @@
  *  Order of components initialization is from top to bottom
  */
 class AppComponent {
+private:
+
+  class RedirectInterceptor : public oatpp::web::server::handler::RequestInterceptor {
+  private:
+    OATPP_COMPONENT(ConfigDto::ObjectWrapper, appConfig);
+  public:
+
+    std::shared_ptr<OutgoingResponse> intercept(std::shared_ptr<IncomingRequest>& request) override {
+      auto host = request->getHeader(oatpp::web::protocol::http::Header::HOST);
+      auto siteHost = appConfig->getHostString();
+      if(!host || !host->equals(siteHost.get())) {
+        auto response = OutgoingResponse::createShared(oatpp::web::protocol::http::Status::CODE_301, nullptr);
+        response->putHeader("Location", appConfig->getCanonicalBaseUrl() + request->getStartingLine().path.toString());
+        return response;
+      }
+      return nullptr;
+    }
+
+  };
+
 private:
   oatpp::base::CommandLineArguments m_cmdArgs;
 public:
@@ -150,7 +171,9 @@ public:
   OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::server::ConnectionHandler>, serverConnectionHandler)("http", [] {
     OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router); // get Router component
     OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor); // get Async executor component
-    return oatpp::web::server::AsyncHttpConnectionHandler::createShared(router, executor);
+    auto handler = oatpp::web::server::AsyncHttpConnectionHandler::createShared(router, executor);
+    handler->addRequestInterceptor(std::make_shared<RedirectInterceptor>());
+    return handler;
   }());
 
   /**

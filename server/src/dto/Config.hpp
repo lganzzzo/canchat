@@ -67,6 +67,23 @@ public:
 
 public:
 
+  oatpp::String getHostString() {
+    oatpp::data::stream::BufferOutputStream stream(256, 256);
+    stream << host << ":" << port;
+    return stream.toString();
+  }
+
+  oatpp::String getCanonicalBaseUrl() {
+    oatpp::data::stream::BufferOutputStream stream(256, 256);
+    if(useTLS) {
+      stream << "https://";
+    } else {
+      stream << "http://";
+    }
+    stream << host << ":" << port;
+    return stream.toString();
+  }
+
   oatpp::String getWebsocketBaseUrl() {
     oatpp::data::stream::BufferOutputStream stream(256, 256);
     if(useTLS) {
