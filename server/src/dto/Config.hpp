@@ -39,6 +39,8 @@ public:
 
   DTO_INIT(ConfigDto, Object)
 
+  DTO_FIELD(String, statisticsUrl);
+
   DTO_FIELD(String, host);
   DTO_FIELD(UInt16, port);
   DTO_FIELD(Boolean, useTLS) = true;
@@ -108,6 +110,10 @@ public:
     }
     stream << host << ":" << port;
     return stream.toString();
+  }
+
+  oatpp::String getStatsUrl() {
+    return getCanonicalBaseUrl() + "/" + statisticsUrl;
   }
 
 };

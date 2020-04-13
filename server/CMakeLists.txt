@@ -13,6 +13,7 @@ add_library(${project_name}-lib
         src/controller/FileController.hpp
         src/controller/RoomsController.hpp
         src/controller/StaticController.hpp
+        src/controller/StatisticsController.hpp
         src/rooms/File.cpp
         src/rooms/File.hpp
         src/rooms/Peer.cpp

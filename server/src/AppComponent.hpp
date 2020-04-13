@@ -114,6 +114,11 @@ public:
       config->tlsCertificateChainPath = m_cmdArgs.getNamedArgumentValue("--tls-chain", "" CERT_CRT_PATH);
     }
 
+    config->statisticsUrl = std::getenv("URL_STATS_PATH");
+    if(!config->statisticsUrl) {
+      config->statisticsUrl = m_cmdArgs.getNamedArgumentValue("--url-stats", "admin/stats.json");
+    }
+
     return config;
 
   }());

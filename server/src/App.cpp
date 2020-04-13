@@ -24,6 +24,7 @@
  *
  ***************************************************************************/
 
+#include "controller/StatisticsController.hpp"
 #include "controller/FileController.hpp"
 #include "controller/RoomsController.hpp"
 #include "controller/StaticController.hpp"
@@ -51,6 +52,9 @@ void run(const oatpp::base::CommandLineArguments& args) {
 
   auto fileController = std::make_shared<FileController>();
   fileController->addEndpointsToRouter(router);
+
+  auto statisticsController = std::make_shared<StatisticsController>();
+  statisticsController->addEndpointsToRouter(router);
 
   /* Get connection handler component */
   OATPP_COMPONENT(std::shared_ptr<oatpp::network::server::ConnectionHandler>, connectionHandler, "http");
@@ -84,6 +88,7 @@ void run(const oatpp::base::CommandLineArguments& args) {
   }
 
   OATPP_LOGI("canchat", "canonical base URL='%s'", appConfig->getCanonicalBaseUrl()->getData());
+  OATPP_LOGI("canchat", "statistics URL='%s'", appConfig->getStatsUrl()->getData());
 
   serverThread.join();
   pingThread.join();
