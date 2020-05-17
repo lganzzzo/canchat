@@ -37,9 +37,9 @@ list(APPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_LIST_DIR}/cmake") # <-- use FindL
 
 find_package(LibreSSL 3.0.0 REQUIRED)
 
-find_package(oatpp              1.0.0 REQUIRED)
-find_package(oatpp-websocket    1.0.0 REQUIRED)
-find_package(oatpp-libressl     1.0.0 REQUIRED)
+find_package(oatpp              1.1.0 REQUIRED)
+find_package(oatpp-websocket    1.1.0 REQUIRED)
+find_package(oatpp-libressl     1.1.0 REQUIRED)
 
 target_link_libraries(${project_name}-lib
 

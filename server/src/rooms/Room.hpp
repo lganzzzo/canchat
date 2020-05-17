@@ -116,7 +116,7 @@ public:
    * Get list of history messages.
    * @return
    */
-  oatpp::List<MessageDto::ObjectWrapper>::ObjectWrapper getHistory();
+  oatpp::List<MessageDto> getHistory();
 
   /**
    * Share file.

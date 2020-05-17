@@ -155,9 +155,9 @@ public:
        * It might be because you have several ssl libraries installed on your machine.
        * Try to make sure you are using libtls, libssl, and libcrypto from the same package
        */
-      result = oatpp::libressl::server::ConnectionProvider::createShared(config, appConfig->port->getValue());
+      result = oatpp::libressl::server::ConnectionProvider::createShared(config, appConfig->port);
     } else {
-      result = oatpp::network::server::SimpleTCPConnectionProvider::createShared(appConfig->port->getValue());
+      result = oatpp::network::server::SimpleTCPConnectionProvider::createShared(appConfig->port);
     }
 
     return result;

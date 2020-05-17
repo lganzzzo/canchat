@@ -69,7 +69,7 @@ void File::Subscriber::requestChunk(v_int64 size) {
     file->chunkPosition = m_progress;
     file->chunkSize = size;
 
-    message->files->pushBack(file);
+    message->files->push_back(file);
 
     m_file->m_host->sendMessageAsync(message);
 

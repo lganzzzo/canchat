@@ -140,16 +140,12 @@ oatpp::async::CoroutineStarter Peer::onApiError(const oatpp::String& errorMessag
 
 }
 
-oatpp::async::CoroutineStarter Peer::validateFilesList(const MessageDto::FilesList::ObjectWrapper& filesList) {
+oatpp::async::CoroutineStarter Peer::validateFilesList(const MessageDto::FilesList& filesList) {
 
-  auto curr = filesList->getFirstNode();
-
-  if(!curr)
+  if(filesList->size() == 0)
     return onApiError("Files list is empty.");
 
-  while(curr != nullptr) {
-
-    auto fileDto = curr->getData();
+  for(auto& fileDto : *filesList) {
 
     if (!fileDto)
       return onApiError("File structure is not provided.");
@@ -159,8 +155,6 @@ oatpp::async::CoroutineStarter Peer::validateFilesList(const MessageDto::FilesLi
       return onApiError("File name is not provided.");
     if (!fileDto->size)
       return onApiError("File size is not provided.");
-
-    curr = curr->getNext();
 
   }
 
@@ -180,21 +174,16 @@ oatpp::async::CoroutineStarter Peer::handleFilesMessage(const MessageDto::Object
   fileMessage->timestamp = oatpp::base::Environment::getMicroTickCount();
   fileMessage->files = MessageDto::FilesList::createShared();
 
-  auto curr = files->getFirstNode();
-  while(curr) {
+  for(auto& currFile : *files) {
 
-    auto currFile = curr->getData();
-
-    auto file = m_room->shareFile(m_peerId, currFile->clientFileId->getValue(), currFile->name, currFile->size->getValue());
+    auto file = m_room->shareFile(m_peerId, currFile->clientFileId, currFile->name, currFile->size);
 
     auto sharedFile = FileDto::createShared();
     sharedFile->serverFileId = file->getServerFileId();
     sharedFile->name = file->getFileName();
     sharedFile->size = file->getFileSize();
 
-    fileMessage->files->pushBack(sharedFile);
-
-    curr = curr->getNext();
+    fileMessage->files->push_back(sharedFile);
 
   }
 
@@ -211,10 +200,10 @@ oatpp::async::CoroutineStarter Peer::handleFileChunkMessage(const MessageDto::Ob
   if(!filesList)
     return onApiError("No file provided.");
 
-  if(filesList->count() > 1)
+  if(filesList->size() > 1)
     return onApiError("Invalid files count. Expected - 1.");
 
-  auto fileDto = filesList->getFirst();
+  auto fileDto = filesList->front();
   if (!fileDto)
     return onApiError("File structure is not provided.");
   if (!fileDto->serverFileId)
@@ -224,7 +213,7 @@ oatpp::async::CoroutineStarter Peer::handleFileChunkMessage(const MessageDto::Ob
   if (!fileDto->data)
     return onApiError("File chunk data is not provided.");
 
-  auto file = m_room->getFileById(fileDto->serverFileId->getValue());
+  auto file = m_room->getFileById(fileDto->serverFileId);
 
   if(!file) return nullptr; // Ignore if file doesn't exist. File may be deleted already.
 
@@ -232,7 +221,7 @@ oatpp::async::CoroutineStarter Peer::handleFileChunkMessage(const MessageDto::Ob
     return onApiError("Wrong file host.");
 
   auto data = oatpp::encoding::Base64::decode(fileDto->data);
-  file->provideFileChunk(fileDto->subscriberId->getValue(), data);
+  file->provideFileChunk(fileDto->subscriberId, data);
 
   return nullptr;
 
@@ -244,7 +233,7 @@ oatpp::async::CoroutineStarter Peer::handleMessage(const MessageDto::ObjectWrapp
     return onApiError("No message code provided.");
   }
 
-  switch(message->code->getValue()) {
+  switch(*message->code) {
 
     case MessageCodes::CODE_PEER_MESSAGE:
       m_room->addHistoryMessage(message);

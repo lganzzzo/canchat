@@ -78,7 +78,7 @@ public:
       defPort = 80;
     }
     stream << host;
-    if(!port || defPort != port->getValue()) {
+    if(!port || defPort != port) {
       stream << ":" << port;
     }
     return stream.toString();
@@ -95,7 +95,7 @@ public:
       defPort = 80;
     }
     stream << host;
-    if(!port || defPort != port->getValue()) {
+    if(!port || defPort != port) {
       stream << ":" << port;
     }
     return stream.toString();

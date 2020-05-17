@@ -80,7 +80,7 @@ private:
 
 private:
 
-  oatpp::async::CoroutineStarter validateFilesList(const MessageDto::FilesList::ObjectWrapper& filesList);
+  oatpp::async::CoroutineStarter validateFilesList(const MessageDto::FilesList& filesList);
   oatpp::async::CoroutineStarter handleFilesMessage(const MessageDto::ObjectWrapper& message);
   oatpp::async::CoroutineStarter handleFileChunkMessage(const MessageDto::ObjectWrapper& message);
 

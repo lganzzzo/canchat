@@ -32,22 +32,21 @@
 
 #include OATPP_CODEGEN_BEGIN(DTO)
 
-enum MessageCodes : v_int64 {
+ENUM(MessageCodes, v_int32,
+  VALUE(CODE_INFO, 0),
 
-  CODE_INFO = 0,
-  CODE_PEER_JOINED = 1,
-  CODE_PEER_LEFT = 2,
-  CODE_PEER_MESSAGE = 3,
-  CODE_PEER_MESSAGE_FILE = 4,
-  CODE_PEER_IS_TYPING = 5,
+  VALUE(CODE_PEER_JOINED, 1),
+  VALUE(CODE_PEER_LEFT, 2),
+  VALUE(CODE_PEER_MESSAGE, 3),
+  VALUE(CODE_PEER_MESSAGE_FILE, 4),
+  VALUE(CODE_PEER_IS_TYPING, 5),
 
-  CODE_FILE_SHARE = 6,
-  CODE_FILE_REQUEST_CHUNK = 7,
-  CODE_FILE_CHUNK_DATA = 8,
+  VALUE(CODE_FILE_SHARE, 6),
+  VALUE(CODE_FILE_REQUEST_CHUNK, 7),
+  VALUE(CODE_FILE_CHUNK_DATA, 8),
 
-  CODE_API_ERROR = 9
-
-};
+  VALUE(CODE_API_ERROR, 9)
+);
 
 class PeerDto : public oatpp::Object {
 public:
@@ -77,21 +76,21 @@ class FileDto : public oatpp::Object {
 
 class MessageDto : public oatpp::Object {
 public:
-  typedef List<FileDto::ObjectWrapper> FilesList;
+  typedef List<FileDto> FilesList;
 public:
 
   DTO_INIT(MessageDto, Object)
 
   DTO_FIELD(Int64, peerId);
   DTO_FIELD(String, peerName);
-  DTO_FIELD(Int32, code);
+  DTO_FIELD(Enum<MessageCodes>::AsNumber::NotNull, code);
   DTO_FIELD(String, message);
   DTO_FIELD(Int64, timestamp);
 
-  DTO_FIELD(List<PeerDto::ObjectWrapper>::ObjectWrapper, peers);
-  DTO_FIELD(List<MessageDto::ObjectWrapper>::ObjectWrapper, history);
+  DTO_FIELD(List<PeerDto>, peers);
+  DTO_FIELD(List<MessageDto>, history);
 
-  DTO_FIELD(List<FileDto::ObjectWrapper>::ObjectWrapper, files);
+  DTO_FIELD(List<FileDto>, files);
 
 };
 

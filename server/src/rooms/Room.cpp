@@ -57,7 +57,7 @@ void Room::onboardPeer(const std::shared_ptr<Peer>& peer) {
   infoMessage->peerId = peer->getPeerId();
   infoMessage->peerName = peer->getNickname();
 
-  infoMessage->peers = infoMessage->peers->createShared();
+  infoMessage->peers = oatpp::List<PeerDto>::createShared();
 
   {
     std::lock_guard<std::mutex> guard(m_peerByIdLock);
@@ -65,7 +65,7 @@ void Room::onboardPeer(const std::shared_ptr<Peer>& peer) {
       auto p = PeerDto::createShared();
       p->peerId = it.second->getPeerId();
       p->peerName = it.second->getNickname();
-      infoMessage->peers->pushBack(p);
+      infoMessage->peers->push_back(p);
     }
   }
 
@@ -119,7 +119,7 @@ void Room::removePeerById(v_int64 peerId) {
 
 void Room::addHistoryMessage(const MessageDto::ObjectWrapper& message) {
 
-  if(!m_appConfig->maxRoomHistoryMessages || m_appConfig->maxRoomHistoryMessages->getValue() == 0) {
+  if(!m_appConfig->maxRoomHistoryMessages || *m_appConfig->maxRoomHistoryMessages == 0) {
     return;
   }
 
@@ -133,18 +133,18 @@ void Room::addHistoryMessage(const MessageDto::ObjectWrapper& message) {
 
 }
 
-oatpp::List<MessageDto::ObjectWrapper>::ObjectWrapper Room::getHistory() {
+oatpp::List<MessageDto> Room::getHistory() {
 
-  if(!m_appConfig->maxRoomHistoryMessages || m_appConfig->maxRoomHistoryMessages->getValue() == 0) {
+  if(!m_appConfig->maxRoomHistoryMessages || *m_appConfig->maxRoomHistoryMessages == 0) {
     return nullptr;
   }
 
-  auto result = oatpp::List<MessageDto::ObjectWrapper>::createShared();
+  auto result = oatpp::List<MessageDto>::createShared();
 
   std::lock_guard<std::mutex> guard(m_historyLock);
 
   for(auto& message : m_history) {
-    result->pushBack(message);
+    result->push_back(message);
   }
 
   return result;

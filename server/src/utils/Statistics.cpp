@@ -38,9 +38,9 @@ void Statistics::takeSample() {
 
   StatPointDto::ObjectWrapper point;
 
-  if (m_dataPoints->count() > 0) {
-    const auto& p = m_dataPoints->getLast();
-    if(nowMicro - p->timestamp->getValue() < pushIntervalMicro) {
+  if (m_dataPoints->size() > 0) {
+    const auto& p = m_dataPoints->back();
+    if(nowMicro - *p->timestamp < pushIntervalMicro) {
       point = p;
     }
   }
@@ -50,12 +50,12 @@ void Statistics::takeSample() {
     point = StatPointDto::createShared();
     point->timestamp = nowMicro;
 
-    m_dataPoints->pushBack(point);
+    m_dataPoints->push_back(point);
 
-    auto diffMicro = nowMicro - m_dataPoints->getFirst()->timestamp->getValue();
+    auto diffMicro = nowMicro - *m_dataPoints->front()->timestamp;
     while(diffMicro > maxPeriodMicro) {
-      m_dataPoints->popFront();
-      diffMicro = nowMicro - m_dataPoints->getFirst()->timestamp->getValue();
+      m_dataPoints->pop_front();
+      diffMicro = nowMicro - *m_dataPoints->front()->timestamp;
     }
 
   }
