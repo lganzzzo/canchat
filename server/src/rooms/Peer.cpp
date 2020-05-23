@@ -30,7 +30,7 @@
 #include "oatpp/network/Connection.hpp"
 #include "oatpp/encoding/Base64.hpp"
 
-void Peer::sendMessageAsync(const MessageDto::ObjectWrapper& message) {
+void Peer::sendMessageAsync(const oatpp::Object<MessageDto>& message) {
 
   class SendMessageCoroutine : public oatpp::async::Coroutine<SendMessageCoroutine> {
   private:
@@ -162,7 +162,7 @@ oatpp::async::CoroutineStarter Peer::validateFilesList(const MessageDto::FilesLi
 
 }
 
-oatpp::async::CoroutineStarter Peer::handleFilesMessage(const MessageDto::ObjectWrapper& message) {
+oatpp::async::CoroutineStarter Peer::handleFilesMessage(const oatpp::Object<MessageDto>& message) {
 
   auto files = message->files;
   validateFilesList(files);
@@ -194,7 +194,7 @@ oatpp::async::CoroutineStarter Peer::handleFilesMessage(const MessageDto::Object
 
 }
 
-oatpp::async::CoroutineStarter Peer::handleFileChunkMessage(const MessageDto::ObjectWrapper& message) {
+oatpp::async::CoroutineStarter Peer::handleFileChunkMessage(const oatpp::Object<MessageDto>& message) {
 
   auto filesList = message->files;
   if(!filesList)
@@ -227,7 +227,7 @@ oatpp::async::CoroutineStarter Peer::handleFileChunkMessage(const MessageDto::Ob
 
 }
 
-oatpp::async::CoroutineStarter Peer::handleMessage(const MessageDto::ObjectWrapper& message) {
+oatpp::async::CoroutineStarter Peer::handleMessage(const oatpp::Object<MessageDto>& message) {
 
   if(!message->code) {
     return onApiError("No message code provided.");
@@ -310,10 +310,10 @@ oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebS
     auto wholeMessage = m_messageBuffer.toString();
     m_messageBuffer.clear();
 
-    MessageDto::ObjectWrapper message;
+    oatpp::Object<MessageDto> message;
 
     try {
-      message = m_objectMapper->readFromString<MessageDto>(wholeMessage);
+      message = m_objectMapper->readFromString<oatpp::Object<MessageDto>>(wholeMessage);
     } catch (const std::runtime_error& e) {
       return onApiError("Can't parse message");
     }

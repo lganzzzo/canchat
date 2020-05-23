@@ -36,7 +36,7 @@ void Statistics::takeSample() {
 
   auto nowMicro = oatpp::base::Environment::getMicroTickCount();
 
-  StatPointDto::ObjectWrapper point;
+  oatpp::Object<StatPointDto> point;
 
   if (m_dataPoints->size() > 0) {
     const auto& p = m_dataPoints->back();

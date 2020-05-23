@@ -57,7 +57,7 @@ void Room::onboardPeer(const std::shared_ptr<Peer>& peer) {
   infoMessage->peerId = peer->getPeerId();
   infoMessage->peerName = peer->getNickname();
 
-  infoMessage->peers = oatpp::List<PeerDto>::createShared();
+  infoMessage->peers = {};
 
   {
     std::lock_guard<std::mutex> guard(m_peerByIdLock);
@@ -117,7 +117,7 @@ void Room::removePeerById(v_int64 peerId) {
 
 }
 
-void Room::addHistoryMessage(const MessageDto::ObjectWrapper& message) {
+void Room::addHistoryMessage(const oatpp::Object<MessageDto>& message) {
 
   if(!m_appConfig->maxRoomHistoryMessages || *m_appConfig->maxRoomHistoryMessages == 0) {
     return;
@@ -133,13 +133,13 @@ void Room::addHistoryMessage(const MessageDto::ObjectWrapper& message) {
 
 }
 
-oatpp::List<MessageDto> Room::getHistory() {
+oatpp::List<oatpp::Object<MessageDto>> Room::getHistory() {
 
   if(!m_appConfig->maxRoomHistoryMessages || *m_appConfig->maxRoomHistoryMessages == 0) {
     return nullptr;
   }
 
-  auto result = oatpp::List<MessageDto>::createShared();
+  auto result = oatpp::List<oatpp::Object<MessageDto>>::createShared();
 
   std::lock_guard<std::mutex> guard(m_historyLock);
 
@@ -180,7 +180,7 @@ std::shared_ptr<File> Room::getFileById(v_int64 fileId) {
   return nullptr;
 }
 
-void Room::sendMessageAsync(const MessageDto::ObjectWrapper& message) {
+void Room::sendMessageAsync(const oatpp::Object<MessageDto>& message) {
   std::lock_guard<std::mutex> guard(m_peerByIdLock);
   for(auto& pair : m_peerById) {
     pair.second->sendMessageAsync(message);

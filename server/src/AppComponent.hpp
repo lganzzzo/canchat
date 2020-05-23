@@ -56,7 +56,7 @@ private:
 
   class RedirectInterceptor : public oatpp::web::server::handler::RequestInterceptor {
   private:
-    OATPP_COMPONENT(ConfigDto::ObjectWrapper, appConfig);
+    OATPP_COMPONENT(oatpp::Object<ConfigDto>, appConfig);
   public:
 
     std::shared_ptr<OutgoingResponse> intercept(std::shared_ptr<IncomingRequest>& request) override {
@@ -83,7 +83,7 @@ public:
   /**
    * Create config component
    */
-  OATPP_CREATE_COMPONENT(ConfigDto::ObjectWrapper, appConfig)([this] {
+  OATPP_CREATE_COMPONENT(oatpp::Object<ConfigDto>, appConfig)([this] {
 
     auto config = ConfigDto::createShared();
 
@@ -135,7 +135,7 @@ public:
    */
   OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, serverConnectionProvider)([] {
 
-    OATPP_COMPONENT(ConfigDto::ObjectWrapper, appConfig);
+    OATPP_COMPONENT(oatpp::Object<ConfigDto>, appConfig);
 
     std::shared_ptr<oatpp::network::ServerConnectionProvider> result;
 

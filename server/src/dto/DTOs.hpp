@@ -48,19 +48,19 @@ ENUM(MessageCodes, v_int32,
   VALUE(CODE_API_ERROR, 9)
 );
 
-class PeerDto : public oatpp::Object {
+class PeerDto : public oatpp::DTO {
 public:
 
-  DTO_INIT(PeerDto, Object)
+  DTO_INIT(PeerDto, DTO)
 
   DTO_FIELD(Int64, peerId);
   DTO_FIELD(String, peerName);
 
 };
 
-class FileDto : public oatpp::Object {
+class FileDto : public oatpp::DTO {
 
-  DTO_INIT(FileDto, Object)
+  DTO_INIT(FileDto, DTO)
 
   DTO_FIELD(Int64, clientFileId);
   DTO_FIELD(Int64, serverFileId);
@@ -74,12 +74,12 @@ class FileDto : public oatpp::Object {
 
 };
 
-class MessageDto : public oatpp::Object {
+class MessageDto : public oatpp::DTO {
 public:
-  typedef List<FileDto> FilesList;
+  typedef List<Object<FileDto>> FilesList;
 public:
 
-  DTO_INIT(MessageDto, Object)
+  DTO_INIT(MessageDto, DTO)
 
   DTO_FIELD(Int64, peerId);
   DTO_FIELD(String, peerName);
@@ -87,16 +87,16 @@ public:
   DTO_FIELD(String, message);
   DTO_FIELD(Int64, timestamp);
 
-  DTO_FIELD(List<PeerDto>, peers);
-  DTO_FIELD(List<MessageDto>, history);
+  DTO_FIELD(List<Object<PeerDto>>, peers);
+  DTO_FIELD(List<Object<MessageDto>>, history);
 
-  DTO_FIELD(List<FileDto>, files);
+  DTO_FIELD(List<Object<FileDto>>, files);
 
 };
 
-class StatPointDto : public oatpp::Object {
+class StatPointDto : public oatpp::DTO {
 
-  DTO_INIT(StatPointDto, Object);
+  DTO_INIT(StatPointDto, DTO);
 
   DTO_FIELD(Int64, timestamp);
 

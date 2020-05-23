@@ -71,7 +71,7 @@ private:
   OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, m_asyncExecutor);
   OATPP_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>, m_objectMapper);
   OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, m_serverConnectionProvider);
-  OATPP_COMPONENT(ConfigDto::ObjectWrapper, m_appConfig);
+  OATPP_COMPONENT(oatpp::Object<ConfigDto>, m_appConfig);
   OATPP_COMPONENT(std::shared_ptr<Statistics>, m_statistics);
 
 private:
@@ -81,10 +81,10 @@ private:
 private:
 
   oatpp::async::CoroutineStarter validateFilesList(const MessageDto::FilesList& filesList);
-  oatpp::async::CoroutineStarter handleFilesMessage(const MessageDto::ObjectWrapper& message);
-  oatpp::async::CoroutineStarter handleFileChunkMessage(const MessageDto::ObjectWrapper& message);
+  oatpp::async::CoroutineStarter handleFilesMessage(const oatpp::Object<MessageDto>& message);
+  oatpp::async::CoroutineStarter handleFileChunkMessage(const oatpp::Object<MessageDto>& message);
 
-  oatpp::async::CoroutineStarter handleMessage(const MessageDto::ObjectWrapper& message);
+  oatpp::async::CoroutineStarter handleMessage(const oatpp::Object<MessageDto>& message);
 
 public:
 
@@ -103,7 +103,7 @@ public:
    * Send message to peer (to user).
    * @param message
    */
-  void sendMessageAsync(const MessageDto::ObjectWrapper& message);
+  void sendMessageAsync(const oatpp::Object<MessageDto>& message);
 
   /**
    * Send Websocket-Ping.

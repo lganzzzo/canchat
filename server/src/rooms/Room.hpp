@@ -43,12 +43,12 @@ private:
   std::atomic<v_int64> m_fileIdCounter;
   std::unordered_map<v_int64, std::shared_ptr<File>> m_fileById;
   std::unordered_map<v_int64, std::shared_ptr<Peer>> m_peerById;
-  std::list<MessageDto::ObjectWrapper> m_history;
+  std::list<oatpp::Object<MessageDto>> m_history;
   std::mutex m_peerByIdLock;
   std::mutex m_fileByIdLock;
   std::mutex m_historyLock;
 private:
-  OATPP_COMPONENT(ConfigDto::ObjectWrapper, m_appConfig);
+  OATPP_COMPONENT(oatpp::Object<ConfigDto>, m_appConfig);
   OATPP_COMPONENT(std::shared_ptr<Statistics>, m_statistics);
 public:
 
@@ -110,13 +110,13 @@ public:
    * Add message to history.
    * @param message
    */
-  void addHistoryMessage(const MessageDto::ObjectWrapper& message);
+  void addHistoryMessage(const oatpp::Object<MessageDto>& message);
 
   /**
    * Get list of history messages.
    * @return
    */
-  oatpp::List<MessageDto> getHistory();
+  oatpp::List<oatpp::Object<MessageDto>> getHistory();
 
   /**
    * Share file.
@@ -139,7 +139,7 @@ public:
    * Send message to all peers in the room.
    * @param message
    */
-  void sendMessageAsync(const MessageDto::ObjectWrapper& message);
+  void sendMessageAsync(const oatpp::Object<MessageDto>& message);
 
   /**
    * Websocket-Ping all peers.

@@ -52,7 +52,7 @@ public:
 private:
   oatpp::parser::json::mapping::ObjectMapper m_objectMapper;
 private:
-  oatpp::List<StatPointDto::ObjectWrapper>::ObjectWrapper m_dataPoints = oatpp::List<StatPointDto::ObjectWrapper>::createShared();
+  oatpp::List<oatpp::Object<StatPointDto>> m_dataPoints = oatpp::List<oatpp::Object<StatPointDto>>::createShared();
   std::mutex m_dataLock;
 private:
   std::chrono::duration<v_int64, std::micro> m_maxPeriod;

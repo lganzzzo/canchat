@@ -43,7 +43,7 @@ class StatisticsController : public oatpp::web::server::api::ApiController {
 private:
   typedef StatisticsController __ControllerType;
 private:
-  OATPP_COMPONENT(ConfigDto::ObjectWrapper, m_appConfig);
+  OATPP_COMPONENT(oatpp::Object<ConfigDto>, m_appConfig);
   OATPP_COMPONENT(std::shared_ptr<Statistics>, m_statistics);
 public:
   StatisticsController(OATPP_COMPONENT(std::shared_ptr<ObjectMapper>, objectMapper))

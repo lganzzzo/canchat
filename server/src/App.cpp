@@ -79,7 +79,7 @@ void run(const oatpp::base::CommandLineArguments& args) {
     statistics->runStatLoop();
   });
 
-  OATPP_COMPONENT(ConfigDto::ObjectWrapper, appConfig);
+  OATPP_COMPONENT(oatpp::Object<ConfigDto>, appConfig);
 
   if(appConfig->useTLS) {
     OATPP_LOGI("canchat", "clients are expected to connect at https://%s:%d/", appConfig->host->c_str(), *appConfig->port);

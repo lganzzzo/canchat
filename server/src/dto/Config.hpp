@@ -27,17 +27,17 @@
 #ifndef Config_hpp
 #define Config_hpp
 
-#include "oatpp/core/data/mapping/type/Object.hpp"
+#include "oatpp/core/Types.hpp"
 #include "oatpp/core/macro/codegen.hpp"
 
 #include "oatpp/core/data/stream/BufferStream.hpp"
 
 #include OATPP_CODEGEN_BEGIN(DTO)
 
-class ConfigDto : public oatpp::data::mapping::type::Object {
+class ConfigDto : public oatpp::DTO {
 public:
 
-  DTO_INIT(ConfigDto, Object)
+  DTO_INIT(ConfigDto, DTO)
 
   DTO_FIELD(String, statisticsUrl);
 
