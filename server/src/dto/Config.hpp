@@ -70,7 +70,7 @@ public:
 public:
 
   oatpp::String getHostString() {
-    oatpp::data::stream::BufferOutputStream stream(256, 256);
+    oatpp::data::stream::BufferOutputStream stream(256);
     v_uint16 defPort;
     if(useTLS) {
       defPort = 443;
@@ -85,7 +85,7 @@ public:
   }
 
   oatpp::String getCanonicalBaseUrl() {
-    oatpp::data::stream::BufferOutputStream stream(256, 256);
+    oatpp::data::stream::BufferOutputStream stream(256);
     v_uint16 defPort;
     if(useTLS) {
       stream << "https://";
@@ -102,7 +102,7 @@ public:
   }
 
   oatpp::String getWebsocketBaseUrl() {
-    oatpp::data::stream::BufferOutputStream stream(256, 256);
+    oatpp::data::stream::BufferOutputStream stream(256);
     if(useTLS) {
       stream << "wss://";
     } else {
