@@ -31,7 +31,7 @@
 #include "utils/Statistics.hpp"
 
 #include "oatpp/web/server/api/ApiController.hpp"
-#include "oatpp/network/server/ConnectionHandler.hpp"
+#include "oatpp/network/ConnectionHandler.hpp"
 
 #include "oatpp/core/macro/codegen.hpp"
 #include "oatpp/core/macro/component.hpp"

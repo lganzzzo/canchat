@@ -27,7 +27,7 @@
 #include "Peer.hpp"
 #include "Room.hpp"
 
-#include "oatpp/network/Connection.hpp"
+#include "oatpp/network/tcp/Connection.hpp"
 #include "oatpp/encoding/Base64.hpp"
 
 void Peer::sendMessageAsync(const oatpp::Object<MessageDto>& message) {
@@ -281,7 +281,7 @@ const std::list<std::shared_ptr<File>>& Peer::getFiles() {
 
 void Peer::invalidateSocket() {
   if(m_socket) {
-    m_serverConnectionProvider->invalidateConnection(m_socket->getConnection());
+    m_serverConnectionProvider->invalidate(m_socket->getConnection());
   }
   m_socket.reset();
 }

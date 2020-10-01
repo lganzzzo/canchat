@@ -38,6 +38,8 @@
 #include "oatpp/web/server/AsyncHttpConnectionHandler.hpp"
 #include "oatpp/web/server/HttpRouter.hpp"
 
+#include "oatpp/network/tcp/server/ConnectionProvider.hpp"
+
 #include "oatpp/parser/json/mapping/ObjectMapper.hpp"
 
 #include "oatpp/core/macro/component.hpp"
@@ -155,9 +157,9 @@ public:
        * It might be because you have several ssl libraries installed on your machine.
        * Try to make sure you are using libtls, libssl, and libcrypto from the same package
        */
-      result = oatpp::libressl::server::ConnectionProvider::createShared(config, appConfig->port);
+      result = oatpp::libressl::server::ConnectionProvider::createShared(config, {"localhost", appConfig->port});
     } else {
-      result = oatpp::network::server::SimpleTCPConnectionProvider::createShared(appConfig->port);
+      result = oatpp::network::tcp::server::ConnectionProvider::createShared({"localhost", appConfig->port});
     }
 
     return result;
@@ -174,7 +176,7 @@ public:
   /**
    *  Create ConnectionHandler component which uses Router component to route requests
    */
-  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::server::ConnectionHandler>, serverConnectionHandler)("http", [] {
+  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>, serverConnectionHandler)("http", [] {
     OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router); // get Router component
     OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor); // get Async executor component
     auto handler = oatpp::web::server::AsyncHttpConnectionHandler::createShared(router, executor);
@@ -208,7 +210,7 @@ public:
   /**
    *  Create websocket connection handler
    */
-  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::server::ConnectionHandler>, websocketConnectionHandler)("websocket", [] {
+  OATPP_CREATE_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>, websocketConnectionHandler)("websocket", [] {
     OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, executor);
     OATPP_COMPONENT(std::shared_ptr<Lobby>, lobby);
     auto connectionHandler = oatpp::websocket::AsyncConnectionHandler::createShared(executor);

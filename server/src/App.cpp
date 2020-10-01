@@ -31,7 +31,7 @@
 
 #include "./AppComponent.hpp"
 
-#include "oatpp/network/server/Server.hpp"
+#include "oatpp/network/Server.hpp"
 
 #include <iostream>
 
@@ -57,13 +57,13 @@ void run(const oatpp::base::CommandLineArguments& args) {
   statisticsController->addEndpointsToRouter(router);
 
   /* Get connection handler component */
-  OATPP_COMPONENT(std::shared_ptr<oatpp::network::server::ConnectionHandler>, connectionHandler, "http");
+  OATPP_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>, connectionHandler, "http");
 
   /* Get connection provider component */
   OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, connectionProvider);
 
   /* Create server which takes provided TCP connections and passes them to HTTP connection handler */
-  oatpp::network::server::Server server(connectionProvider, connectionHandler);
+  oatpp::network::Server server(connectionProvider, connectionHandler);
 
   std::thread serverThread([&server]{
     server.run();

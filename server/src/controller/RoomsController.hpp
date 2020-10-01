@@ -32,7 +32,7 @@
 #include "oatpp-websocket/Handshaker.hpp"
 
 #include "oatpp/web/server/api/ApiController.hpp"
-#include "oatpp/network/server/ConnectionHandler.hpp"
+#include "oatpp/network/ConnectionHandler.hpp"
 
 #include "oatpp/core/macro/codegen.hpp"
 #include "oatpp/core/macro/component.hpp"
@@ -44,7 +44,7 @@ class RoomsController : public oatpp::web::server::api::ApiController {
 private:
   typedef RoomsController __ControllerType;
 private:
-  OATPP_COMPONENT(std::shared_ptr<oatpp::network::server::ConnectionHandler>, websocketConnectionHandler, "websocket");
+  OATPP_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>, websocketConnectionHandler, "websocket");
 public:
   RoomsController(OATPP_COMPONENT(std::shared_ptr<ObjectMapper>, objectMapper))
     : oatpp::web::server::api::ApiController(objectMapper)
@@ -65,7 +65,7 @@ public:
       /* Websocket handshake */
       auto response = oatpp::websocket::Handshaker::serversideHandshake(request->getHeaders(), controller->websocketConnectionHandler);
 
-      auto parameters = std::make_shared<oatpp::network::server::ConnectionHandler::ParameterMap>();
+      auto parameters = std::make_shared<oatpp::network::ConnectionHandler::ParameterMap>();
 
       (*parameters)["roomName"] = roomName;
       (*parameters)["nickname"] = nickname;
