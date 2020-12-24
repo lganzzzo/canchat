@@ -98,7 +98,7 @@ const char* const Nickname::ADJECTIVES[] = {
   "Gentle",
   "Happy",
   "Jolly",
-  "Kindv",
+  "Kind",
   "Lively",
   "Nice",
   "Obedient",

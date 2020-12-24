@@ -34,7 +34,7 @@
 #include "oatpp-libressl/server/ConnectionProvider.hpp"
 #include "oatpp-libressl/Config.hpp"
 
-#include "oatpp/web/server/handler/Interceptor.hpp"
+#include "oatpp/web/server/interceptor/RequestInterceptor.hpp"
 #include "oatpp/web/server/AsyncHttpConnectionHandler.hpp"
 #include "oatpp/web/server/HttpRouter.hpp"
 
@@ -56,12 +56,12 @@
 class AppComponent {
 private:
 
-  class RedirectInterceptor : public oatpp::web::server::handler::RequestInterceptor {
+  class RedirectInterceptor : public oatpp::web::server::interceptor::RequestInterceptor {
   private:
     OATPP_COMPONENT(oatpp::Object<ConfigDto>, appConfig);
   public:
 
-    std::shared_ptr<OutgoingResponse> intercept(std::shared_ptr<IncomingRequest>& request) override {
+    std::shared_ptr<OutgoingResponse> intercept(const std::shared_ptr<IncomingRequest>& request) override {
       auto host = request->getHeader(oatpp::web::protocol::http::Header::HOST);
       auto siteHost = appConfig->getHostString();
       if(!host || !host->equals(siteHost.get())) {
