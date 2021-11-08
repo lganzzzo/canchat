@@ -64,7 +64,7 @@ private:
     std::shared_ptr<OutgoingResponse> intercept(const std::shared_ptr<IncomingRequest>& request) override {
       auto host = request->getHeader(oatpp::web::protocol::http::Header::HOST);
       auto siteHost = appConfig->getHostString();
-      if(!host || !host->equals(siteHost.get())) {
+      if(!host || host != siteHost) {
         auto response = OutgoingResponse::createShared(oatpp::web::protocol::http::Status::CODE_301, nullptr);
         response->putHeader("Location", appConfig->getCanonicalBaseUrl() + request->getStartingLine().path.toString());
         return response;

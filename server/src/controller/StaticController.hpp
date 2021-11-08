@@ -46,9 +46,9 @@ private:
 private:
 
   static oatpp::String loadFile(const char* filename) {
-    auto buffer = oatpp::base::StrBuffer::loadFromFile(filename);
-    OATPP_ASSERT_HTTP(buffer, Status::CODE_404, "File Not Found:(");
-    return buffer;
+    oatpp::String fileContent = oatpp::String::loadFromFile(filename);
+    OATPP_ASSERT_HTTP(fileContent, Status::CODE_404, "File Not Found:(");
+    return fileContent;
   }
 public:
   StaticController(OATPP_COMPONENT(std::shared_ptr<ObjectMapper>, objectMapper))
@@ -75,9 +75,9 @@ public:
     ENDPOINT_ASYNC_INIT(ChatHTML)
 
     Action act() override {
-      static auto fileCache = loadFile(FRONT_PATH "/chat/index.html")->std_str();
-      auto text = std::regex_replace(fileCache, std::regex("%%%ROOM_ID%%%"), request->getPathVariable("roomId")->std_str());
-      auto response = controller->createResponse(Status::CODE_200, oatpp::String(text.data(), text.size(), true));
+      static auto fileCache = loadFile(FRONT_PATH "/chat/index.html");
+      auto text = std::regex_replace(*fileCache, std::regex("%%%ROOM_ID%%%"), *request->getPathVariable("roomId"));
+      auto response = controller->createResponse(Status::CODE_200, oatpp::String(text.data(), text.size()));
       response->putHeader(Header::CONTENT_TYPE, "text/html");
       return _return(response);
     }
