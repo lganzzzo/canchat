@@ -113,11 +113,11 @@ oatpp::v_io_size File::Subscriber::readChunk(void *buffer, v_buff_size count, oa
   if(m_progress < m_file->getFileSize()) {
 
     if (m_chunk) {
-      v_int64 chunkSize = m_chunk->getSize();
+      v_int64 chunkSize = m_chunk->size();
       if(chunkSize > count) {
         throw std::runtime_error("Invalid chunk size");
       }
-      std::memcpy(buffer, m_chunk->getData(), chunkSize);
+      std::memcpy(buffer, m_chunk->data(), chunkSize);
       m_progress += chunkSize;
       m_chunk = nullptr;
       return chunkSize;

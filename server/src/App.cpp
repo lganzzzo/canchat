@@ -44,17 +44,10 @@ void run(const oatpp::base::CommandLineArguments& args) {
   OATPP_COMPONENT(std::shared_ptr<oatpp::web::server::HttpRouter>, router);
 
   /* Create RoomsController and add all of its endpoints to router */
-  auto roomsController = std::make_shared<RoomsController>();
-  roomsController->addEndpointsToRouter(router);
-
-  auto staticController = std::make_shared<StaticController>();
-  staticController->addEndpointsToRouter(router);
-
-  auto fileController = std::make_shared<FileController>();
-  fileController->addEndpointsToRouter(router);
-
-  auto statisticsController = std::make_shared<StatisticsController>();
-  statisticsController->addEndpointsToRouter(router);
+  router->addController(std::make_shared<RoomsController>());
+  router->addController(std::make_shared<StaticController>());
+  router->addController(std::make_shared<FileController>());
+  router->addController(std::make_shared<StatisticsController>());
 
   /* Get connection handler component */
   OATPP_COMPONENT(std::shared_ptr<oatpp::network::ConnectionHandler>, connectionHandler, "http");

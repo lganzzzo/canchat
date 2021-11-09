@@ -281,7 +281,7 @@ const std::list<std::shared_ptr<File>>& Peer::getFiles() {
 
 void Peer::invalidateSocket() {
   if(m_socket) {
-    m_serverConnectionProvider->invalidate(m_socket->getConnection());
+    m_socket->getConnection().invalidate();
   }
   m_socket.reset();
 }

@@ -70,7 +70,6 @@ private:
 
   OATPP_COMPONENT(std::shared_ptr<oatpp::async::Executor>, m_asyncExecutor);
   OATPP_COMPONENT(std::shared_ptr<oatpp::data::mapping::ObjectMapper>, m_objectMapper);
-  OATPP_COMPONENT(std::shared_ptr<oatpp::network::ServerConnectionProvider>, m_serverConnectionProvider);
   OATPP_COMPONENT(oatpp::Object<ConfigDto>, m_appConfig);
   OATPP_COMPONENT(std::shared_ptr<Statistics>, m_statistics);
 
