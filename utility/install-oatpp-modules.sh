@@ -43,7 +43,7 @@ cd ../../
 
 install_module $BUILD_TYPE oatpp
 install_module $BUILD_TYPE oatpp-websocket
-install_module $BUILD_TYPE oatpp-libressl
+install_module $BUILD_TYPE oatpp-openssl
 
 cd ../
 rm -rf tmp
