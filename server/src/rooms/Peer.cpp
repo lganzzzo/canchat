@@ -301,14 +301,14 @@ oatpp::async::CoroutineStarter Peer::onClose(const std::shared_ptr<AsyncWebSocke
 
 oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebSocket>& socket, v_uint8 opcode, p_char8 data, oatpp::v_io_size size) {
 
-  if(m_messageBuffer.getSize() + size >  m_appConfig->maxMessageSizeBytes) {
+  if(m_messageBuffer.getCurrentPosition() + size >  m_appConfig->maxMessageSizeBytes) {
     return onApiError("Message size exceeds max allowed size.");
   }
 
   if(size == 0) { // message transfer finished
 
     auto wholeMessage = m_messageBuffer.toString();
-    m_messageBuffer.clear();
+    m_messageBuffer.setCurrentPosition(0);
 
     oatpp::Object<MessageDto> message;
 
