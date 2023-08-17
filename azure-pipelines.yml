@@ -14,7 +14,7 @@ jobs:
     steps:
       - script: |
           sudo apt-get install libssl-dev -y
-          displayName: 'Install - openssl'
+        displayName: 'Install - openssl'
       - script: |
           sudo /bin/bash ./install-oatpp-modules.sh
         displayName: 'install oatpp modules'
