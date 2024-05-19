@@ -171,7 +171,7 @@ oatpp::async::CoroutineStarter Peer::handleFilesMessage(const oatpp::Object<Mess
   fileMessage->code = MessageCodes::CODE_PEER_MESSAGE_FILE;
   fileMessage->peerId = m_peerId;
   fileMessage->peerName = m_nickname;
-  fileMessage->timestamp = oatpp::base::Environment::getMicroTickCount();
+  fileMessage->timestamp = oatpp::Environment::getMicroTickCount();
   fileMessage->files = MessageDto::FilesList::createShared();
 
   for(auto& currFile : *files) {
@@ -320,7 +320,7 @@ oatpp::async::CoroutineStarter Peer::readMessage(const std::shared_ptr<AsyncWebS
 
     message->peerName = m_nickname;
     message->peerId = m_peerId;
-    message->timestamp = oatpp::base::Environment::getMicroTickCount();
+    message->timestamp = oatpp::Environment::getMicroTickCount();
 
     return handleMessage(message);
 

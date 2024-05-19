@@ -32,10 +32,10 @@
 
 #include "oatpp/web/protocol/http/outgoing/StreamingBody.hpp"
 #include "oatpp/web/server/api/ApiController.hpp"
-#include "oatpp/core/utils/ConversionUtils.hpp"
+#include "oatpp/utils/Conversion.hpp"
 
-#include "oatpp/core/macro/codegen.hpp"
-#include "oatpp/core/macro/component.hpp"
+#include "oatpp/macro/codegen.hpp"
+#include "oatpp/macro/component.hpp"
 
 #include <regex>
 
@@ -82,7 +82,7 @@ public:
       oatpp::String roomId = request->getPathVariable("roomId");
 
       bool success;
-      v_int64 fileId = oatpp::utils::conversion::strToInt64(request->getPathVariable("fileId"), success);
+      v_int64 fileId = oatpp::utils::Conversion::strToInt64(request->getPathVariable("fileId"), success);
       OATPP_ASSERT_HTTP(success, Status::CODE_400, "Invalid fileId");
 
       auto room = controller->lobby->getRoom(roomId);

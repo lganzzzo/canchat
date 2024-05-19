@@ -30,8 +30,8 @@
 #include "dto/Config.hpp"
 #include "oatpp/web/server/api/ApiController.hpp"
 
-#include "oatpp/core/macro/codegen.hpp"
-#include "oatpp/core/macro/component.hpp"
+#include "oatpp/macro/codegen.hpp"
+#include "oatpp/macro/component.hpp"
 
 #include <regex>
 

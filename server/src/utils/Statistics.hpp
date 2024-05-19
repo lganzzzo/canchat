@@ -28,8 +28,8 @@
 #define Statistics_hpp
 
 #include "dto/DTOs.hpp"
-#include "oatpp/parser/json/mapping/ObjectMapper.hpp"
-#include "oatpp/core/Types.hpp"
+#include "oatpp/json/ObjectMapper.hpp"
+#include "oatpp/Types.hpp"
 
 #include <chrono>
 
@@ -50,7 +50,7 @@ public:
   std::atomic<v_uint64> FILE_SERVED_BYTES         {0};          // Overall shared files served bytes
 
 private:
-  oatpp::parser::json::mapping::ObjectMapper m_objectMapper;
+  oatpp::json::ObjectMapper m_objectMapper;
 private:
   oatpp::List<oatpp::Object<StatPointDto>> m_dataPoints = oatpp::List<oatpp::Object<StatPointDto>>::createShared();
   std::mutex m_dataLock;

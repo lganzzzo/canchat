@@ -75,13 +75,13 @@ void run(const oatpp::base::CommandLineArguments& args) {
   OATPP_COMPONENT(oatpp::Object<ConfigDto>, appConfig);
 
   if(appConfig->useTLS) {
-    OATPP_LOGI("canchat", "clients are expected to connect at https://%s:%d/", appConfig->host->c_str(), *appConfig->port);
+    OATPP_LOGi("canchat", "clients are expected to connect at https://{}:{}/", appConfig->host, appConfig->port);
   } else {
-    OATPP_LOGI("canchat", "clients are expected to connect at http://%s:%d/", appConfig->host->c_str(), *appConfig->port);
+    OATPP_LOGi("canchat", "clients are expected to connect at http://{}:{}/", appConfig->host, appConfig->port);
   }
 
-  OATPP_LOGI("canchat", "canonical base URL=%s", appConfig->getCanonicalBaseUrl()->c_str());
-  OATPP_LOGI("canchat", "statistics URL=%s", appConfig->getStatsUrl()->c_str());
+  OATPP_LOGi("canchat", "canonical base URL={}", appConfig->getCanonicalBaseUrl())
+  OATPP_LOGi("canchat", "statistics URL={}", appConfig->getStatsUrl())
 
   serverThread.join();
   pingThread.join();
@@ -91,11 +91,11 @@ void run(const oatpp::base::CommandLineArguments& args) {
 
 int main(int argc, const char * argv[]) {
 
-  oatpp::base::Environment::init();
+  oatpp::Environment::init();
 
   run(oatpp::base::CommandLineArguments(argc, argv));
 
-  oatpp::base::Environment::destroy();
+  oatpp::Environment::destroy();
 
   return 0;
 }

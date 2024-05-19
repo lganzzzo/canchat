@@ -25,7 +25,7 @@
  ***************************************************************************/
 
 #include "Nickname.hpp"
-#include "oatpp/core/data/stream/BufferStream.hpp"
+#include "oatpp/data/stream/BufferStream.hpp"
 
 const char* const Nickname::AVATARS[] = {
   "⚽", "⛄", "🏖", "⛵", "⛺",

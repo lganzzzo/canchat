@@ -32,7 +32,7 @@
 #include "dto/DTOs.hpp"
 #include "utils/Statistics.hpp"
 
-#include "oatpp/core/macro/component.hpp"
+#include "oatpp/macro/component.hpp"
 
 #include <unordered_map>
 #include <list>

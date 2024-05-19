@@ -34,8 +34,8 @@
 #include "oatpp/web/server/api/ApiController.hpp"
 #include "oatpp/network/ConnectionHandler.hpp"
 
-#include "oatpp/core/macro/codegen.hpp"
-#include "oatpp/core/macro/component.hpp"
+#include "oatpp/macro/codegen.hpp"
+#include "oatpp/macro/component.hpp"
 
 
 #include OATPP_CODEGEN_BEGIN(ApiController) /// <-- Begin Code-Gen

@@ -34,7 +34,7 @@ void Statistics::takeSample() {
 
   std::lock_guard<std::mutex> guard(m_dataLock);
 
-  auto nowMicro = oatpp::base::Environment::getMicroTickCount();
+  auto nowMicro = oatpp::Environment::getMicroTickCount();
 
   oatpp::Object<StatPointDto> point;
 

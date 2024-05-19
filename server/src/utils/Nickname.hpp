@@ -27,7 +27,7 @@
 #ifndef Nickname_hpp
 #define Nickname_hpp
 
-#include "oatpp/core/Types.hpp"
+#include "oatpp/Types.hpp"
 
 #include <vector>
 #include <random>

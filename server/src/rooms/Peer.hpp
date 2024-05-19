@@ -36,10 +36,10 @@
 
 #include "oatpp/network/ConnectionProvider.hpp"
 
-#include "oatpp/core/async/Lock.hpp"
-#include "oatpp/core/async/Executor.hpp"
-#include "oatpp/core/data/mapping/ObjectMapper.hpp"
-#include "oatpp/core/macro/component.hpp"
+#include "oatpp/async/Lock.hpp"
+#include "oatpp/async/Executor.hpp"
+#include "oatpp/data/mapping/ObjectMapper.hpp"
+#include "oatpp/macro/component.hpp"
 
 class Room; // FWD
 

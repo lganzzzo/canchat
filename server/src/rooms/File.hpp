@@ -27,8 +27,8 @@
 #ifndef File_hpp
 #define File_hpp
 
-#include "oatpp/core/data/stream/Stream.hpp"
-#include "oatpp/core/async/CoroutineWaitList.hpp"
+#include "oatpp/data/stream/Stream.hpp"
+#include "oatpp/async/CoroutineWaitList.hpp"
 #include <unordered_map>
 
 class Peer; // FWD
