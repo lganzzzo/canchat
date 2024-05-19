@@ -6,6 +6,6 @@
 
 void WSTest::onRun() {
 
-  OATPP_LOGD(TAG, "TODO - write tests");
+  OATPP_LOGd(TAG, "TODO - write tests");
 
 }
